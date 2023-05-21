@@ -1,0 +1,6 @@
+node_modules
+build
+db
+.env
+test.ts
+yarn.lock

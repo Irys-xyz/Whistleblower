@@ -1,0 +1,41 @@
+{
+    "compilerOptions": {
+      "target": "es2019",
+      "module": "commonjs",
+      "moduleResolution": "nodenext",
+      "skipLibCheck": true,
+      "allowSyntheticDefaultImports": true,
+      "allowJs": true,
+      "importHelpers": true,
+      "declaration": false,
+      "outDir": "lib",
+      "lib": [
+        "esnext",
+        "es2019",
+        "DOM"
+      ],
+      "esModuleInterop": true,
+      "alwaysStrict": true,
+      "sourceMap": true,
+      "forceConsistentCasingInFileNames": true,
+      "noFallthroughCasesInSwitch": true,
+      "noImplicitReturns": true,
+      "noUnusedLocals": true,
+      "noUnusedParameters": true,
+      "noImplicitAny": false,
+      "noImplicitThis": false,
+      "strictNullChecks": true,
+      "experimentalDecorators": true,
+      "strict": true,
+      "rootDirs": ["."]
+    },
+    "include": [
+      "src/**/*",
+      "tests/**/*",
+      "migrations/**/*",
+      "__mocks__/**/*",
+      "knexfile.ts",
+      "scripts/*.ts"
+    ]
+  }
+  
