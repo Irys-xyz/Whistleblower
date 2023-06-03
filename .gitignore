@@ -1,6 +1,8 @@
 node_modules
 build
-db
 .env
 test.ts
 yarn.lock
+db/*
+.vscode
+config.ts

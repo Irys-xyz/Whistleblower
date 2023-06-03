@@ -1,11 +1,7 @@
-import { config } from "dotenv";
 import { createLogger, format, transports } from "winston";
+import { LOG_LEVEL } from "./env";
 
 const { combine, timestamp, printf, label } = format;
-
-process.env = { ...config().parsed, ...process.env };
-const IN_TEST_MODE = process.env.JEST_WORKER_ID !== undefined;
-const LOG_LEVEL = IN_TEST_MODE ? "warn" : process.env.LOG_LEVEL ?? "info";
 
 const myFormat = printf(({ level, message, label, timestamp }) => {
   return `${timestamp} [${label}] ${level}: ${message}`;
@@ -13,7 +9,7 @@ const myFormat = printf(({ level, message, label, timestamp }) => {
 
 export const logger = createLogger({
   level: LOG_LEVEL,
-  format: combine(timestamp(), label({ label: "Bundler Node" }), format.cli({}), myFormat),
+  format: combine(timestamp(), label({ label: "WhistleBlower" }), format.cli({}), myFormat),
   transports: [
     new transports.Console(),
     // new transports.File({

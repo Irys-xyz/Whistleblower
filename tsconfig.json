@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-      "target": "es2019",
+      "target": "ES2022",
       "module": "commonjs",
       "moduleResolution": "nodenext",
       "skipLibCheck": true,
@@ -11,7 +11,7 @@
       "outDir": "lib",
       "lib": [
         "esnext",
-        "es2019",
+        "ES2022",
         "DOM"
       ],
       "esModuleInterop": true,
@@ -27,7 +27,23 @@
       "strictNullChecks": true,
       "experimentalDecorators": true,
       "strict": true,
-      "rootDirs": ["."]
+      "baseUrl": "./src",
+      "rootDir": ".",
+      "paths": {
+        "@logger": ["utils/logger"],
+        "@db/*": ["db/*"],
+        "@utils": ["utils/index"],
+        "@utils/*": ["utils/*"],
+        "@/*": ["./*"],
+      }
+    },
+    "ts-node": {
+      "require": ["tsconfig-paths/register"],
+      "esm": false,
+      "transpileOnly": true,
+      "compilerOptions": {
+        "module": "CommonJS"
+      }
     },
     "include": [
       "src/**/*",
@@ -35,7 +51,10 @@
       "migrations/**/*",
       "__mocks__/**/*",
       "knexfile.ts",
-      "scripts/*.ts"
+      "scripts/*.ts",
+      "config.ts",
+      "test.ts",
+      "alert.ts"
     ]
   }
   

@@ -2,10 +2,12 @@
     "extends": "./tsconfig.json",
     "compilerOptions": {
         "outDir": "build",
-        "declaration": false
+        "declaration": true
     },
     "exclude": [
         "migrations",
-        "knexfile.ts"
+        "knexfile.ts",
+        "test.ts",
+        "scripts/**/*"
     ]
 }

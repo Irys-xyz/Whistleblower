@@ -5,7 +5,7 @@
   "parser": "typescript",
   "endOfLine": "lf",
   "trailingComma": "all",
-  "printWidth": 150,
+  "printWidth": 120,
   "overrides": [
     {
       "files": "*.ts",

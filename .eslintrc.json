@@ -27,6 +27,7 @@
   ],
   "rules": {
     "@typescript-eslint/no-unnecessary-condition": "off",
+    "@typescript-eslint/consistent-type-definitions": ["warn", "type"],
     "@typescript-eslint/consistent-type-imports": ["error", {"prefer": "type-imports", "fixStyle": "inline-type-imports"}],
     // "quotes": ["error", "double"],
     "object-curly-spacing": ["error", "always"],

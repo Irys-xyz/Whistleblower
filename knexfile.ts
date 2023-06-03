@@ -7,11 +7,13 @@ export default {
   connection: {
     filename: DATABASE_FILE_PATH,
   },
+  useNullAsDefault: true,
   migrations: {
     tableName: "migrations",
     loadExtensions: [".ts"],
     extension: "ts",
     directory: "./migrations",
+    disableTransactions: true, // without this pragma and vacuum don't work :/
   },
   onUpdateTrigger: (table) => `
     CREATE TRIGGER ${table}_updated_at
