@@ -1,7 +1,7 @@
 import { type SignedReceiptBody, type Transaction } from "@/types/bundler";
 import database from "./sqlite";
 import { getNetworkHeight } from "@utils/arweave";
-import { TX_DEADLINE_OFFSET } from "@utils/env";
+import { DEBUG, TX_DEADLINE_OFFSET } from "@utils/env";
 import { type Transactions } from "@/types/db";
 import logger from "@logger";
 
@@ -18,7 +18,7 @@ export async function insertTransaction(tx: Transaction): Promise<void> {
     .onConflict("tx_id")
     .ignore();
 
-  logger.debug(`[insertTransaction] Took ${performance.now() - then}ms`);
+  if (DEBUG) logger.debug(`[insertTransaction] inserting ${tx.id} Took ${performance.now() - then}ms`);
 }
 
 export async function insertReceipt(tx: SignedReceiptBody): Promise<void> {
