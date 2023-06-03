@@ -45,9 +45,10 @@ export const DATABASE_FILE_PATH = resolve(DATABASE_DIR, config?.database?.file ?
 
 export const ALERT_FILE_PATH = resolve(
   process.cwd(),
-  config?.alert?.filePath ?? IS_TS ? "config.ts" : "./build/config.js",
+  config?.alert?.filePath ?? IS_TS ? "alert.ts" : "./build/alert.js",
 );
-if (!statSync(ALERT_FILE_PATH, { throwIfNoEntry: true })) throw new Error(`Alert file not found at ${ALERT_FILE_PATH}`);
+if (!statSync(ALERT_FILE_PATH, { throwIfNoEntry: false }))
+  throw new Error(`Alert file not found at ${ALERT_FILE_PATH}`);
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 export const alertFunction = require(ALERT_FILE_PATH).default;
