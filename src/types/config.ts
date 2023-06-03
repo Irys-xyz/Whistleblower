@@ -10,7 +10,7 @@ export type Config = {
     basePeers?: UrlString[];
     startHeight?: number;
   };
-  bundlers: Record<
+  bundlers?: Record<
     UrlString,
     {
       checkExpression?: string;
