@@ -3,11 +3,14 @@ import database from "@/db/sqlite";
 import { type Bundlers } from "@/types/db";
 import { startWsListener } from "@/worker/listener";
 import logger from "@logger";
-import { fmtError } from "@utils";
 
-const trap = (err): void => void logger.error(`[Whistleblower:trap] Caught error ${fmtError(err)}`);
-process.on("uncaughtException", trap.bind(this, "uncaughtException"));
-process.on("unhandledRejection", trap.bind(this, "unhandledRejection"));
+process.on(
+  "uncaughtException",
+  (error, origin) => void logger.error(`[Whistleblower:trap] Caught UncaughtException ${error} - ${origin}`),
+);
+process.on("unhandledRejection", (reason, promise) =>
+  logger.error(`[Whistleblower:trap] Caught unhandledRejection ${reason} - ${promise}`),
+);
 
 (async function (): Promise<void> {
   if (!process.env?.disableMsg)
@@ -28,6 +31,7 @@ process.on("unhandledRejection", trap.bind(this, "unhandledRejection"));
     logger.error(`[Whistleblower] 0 registered bundler nodes detected, please add some!`);
     process.exit(1);
   }
+
   for (const bundlerUrl of bundlers) {
     logger.info(`Starting listener for ${bundlerUrl.host}`);
     await startWsListener(`ws://${bundlerUrl.host}`);

@@ -23,6 +23,11 @@ export async function verifyBundle(bundleId: string): Promise<void> {
     if (txStatus.status !== 200) {
       return void logger.error(`[verifyBundle] Bundle ${bundleId} has a non 200 status code - requeueing`);
     }
+    if (txStatus.data.number_of_confirmations < 50) {
+      return void logger.info(
+        `[verifyBundle] Bundle ${bundleId} has not received the required number of confirmations (${txStatus.data.number_of_confirmations} <50)`,
+      );
+    }
 
     // download and verify data
     const res = await processStream(Readable.from(downloadTx(bundleId))).catch((e: Error) => e);
