@@ -12,7 +12,7 @@ export async function crawlForPeers(maxDepth = MAX_PEER_DEPTH): Promise<void> {
 
 async function getPeers(peer: URL, maxDepth: number, depth = 0): Promise<void> {
   logger.debug(`[getPeers] Getting peers from ${peer} - at depth ${depth}`);
-  if (depth === maxDepth) return;
+  if (depth >= maxDepth) return;
   try {
     const response = await retryRequest(peer + "/peers", { method: "get", timeout: 3000 });
     const peers = (response.data as string[]).map((v) => new URL("http://" + v));
