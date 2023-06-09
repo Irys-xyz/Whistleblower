@@ -20,7 +20,7 @@ if a tx has been invalidated or hasn't been validated after it's deadline height
 WB allows you to provide a custom alert function, the interface can be found [here](./src/utils/alert.ts), and an example [here](./alert.ts)
 
 # configuration
-WB doesn't require much configuration, but a config file (schema [here](./types/config.ts)) can be provided to tweak how it functions
+WB doesn't require much configuration, but a config file (schema [here](./src/types/config.ts)) can be provided to tweak how it functions
 
 # getting started
 
