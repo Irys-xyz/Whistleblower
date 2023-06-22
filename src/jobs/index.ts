@@ -8,13 +8,17 @@ import { pruneOldBundles, pruneOldTxs } from "./prune";
 import { verifyTxs } from "./verifyTxs";
 
 export async function registerCrons(): Promise<void> {
-  await pruneOldBundles();
   createCron("Crawl for peers", "*/30 * * * * *", crawlForPeers);
-  createCron("Verify bundles", "*/15 * * * * *", verifyBundles);
-  createCron("Get posted bundles", "*/30 * * * * * ", getAllNodePostedBundles);
-  createCron("Check orphan txs", "0 */1 * * * *", resolveOrphanTxs);
   createCron("Prune old txs", "15 */1 * * * *", pruneOldTxs);
   createCron("Prune old bundles", "45 */5 * * * *", pruneOldBundles);
+  // run crons once to safely catch up before continuing, otherwise race conditions can cause failures
+  await getAllNodePostedBundles(); // get all bundles
+  await verifyBundles(); // index all bundles
+  await resolveOrphanTxs(); // locate orphans
+  // now we should be up-to-date
+  createCron("Get posted bundles", "*/30 * * * * * ", getAllNodePostedBundles);
+  createCron("Verify bundles", "*/15 * * * * *", verifyBundles);
+  createCron("Check orphan txs", "0 */1 * * * *", resolveOrphanTxs);
   createCron("Verify Txs", "*/30 * * * * *", verifyTxs);
 }
 
