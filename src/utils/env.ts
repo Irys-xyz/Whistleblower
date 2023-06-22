@@ -53,19 +53,16 @@ if (!statSync(ALERT_FILE_PATH, { throwIfNoEntry: false }))
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 export const alertFunction = require(ALERT_FILE_PATH).default;
 
-export const BUNDLERS = config?.bundlers;
-
+export const GATEWAY_URL = config?.arweave?.gatewayUrl ?? new URL(`http://arweave.net`);
 export const GATEWAY_CONFIG: ApiConfig = {
-  host: "arweave.net",
-  port: 80,
-  protocol: "http",
-  ...config?.arweave?.gateway,
+  host: GATEWAY_URL?.host,
+  port: GATEWAY_URL?.port,
+  protocol: GATEWAY_URL?.protocol.replaceAll(":", ""),
 };
+
 export const TX_DEADLINE_OFFSET = config?.system?.txDeadlineOffset ?? 1000;
-export const GATEWAY_URL = new URL(`${GATEWAY_CONFIG.protocol}://${GATEWAY_CONFIG.host}:${GATEWAY_CONFIG.port}`);
 export const MAX_PEER_DEPTH = config?.system?.maxPeerDepth ?? 2;
 export const START_HEIGHT = config?.arweave?.startHeight;
-
 export const MAX_TX_AGE = config?.system?.maxTxAgeMs ?? ONE_WEEK;
 export const MAX_BUNDLE_AGE = config?.system?.maxBundleAgeMs ?? ONE_WEEK;
 export const ORPHAN_AGE_THRESHOLD = config?.system?.orphanTxAgeThresholdMs ?? 20 * 2 * 60 * 1000; // 20 blocks (ish)
