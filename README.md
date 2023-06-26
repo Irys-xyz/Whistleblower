@@ -2,7 +2,7 @@
 
 Whistleblower is a lightweight, fully-featured transaction and bundle verifier that allows anyone to monitor a Bundlr node and ensure transactions are finalized on Arweave.
 
-IMG
+![](https://github.com/Bundlr-Network/Whistleblower/blob/master/assets/whistleblower.png?raw=true)
 
 Whistleblower monitors transactions uploaded to Bundlr and their finalization on Arweave. For each upload, Whistleblower checks the assigned deadline height - the block number by which a transaction must be finalized - and ensures it’s finalized by this block number. Acting as a bridge between Bundlr nodes and Arweave, it matches uploaded transactions with finalized ones, and triggers alerts if any transaction misses its deadline.
 
@@ -45,7 +45,8 @@ Whistleblower is designed to be user-friendly and requires minimal configuration
 
 
 ## Running
- IMG
+ 
+![](https://github.com/Bundlr-Network/Whistleblower/blob/master/assets/whistleblower-running.png?raw=true)
 
 You can run Whistleblower using either yarn or npm. Start by initializing it with the address(es) of the nodes you want to monitor, then start the application.
 
