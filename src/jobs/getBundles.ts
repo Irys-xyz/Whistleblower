@@ -23,14 +23,14 @@ export async function getPostedBundles(
   config?: { sinceHeight?: number; count?: IntRange<1, 101> },
 ): Promise<void> {
   const sinceHeight =
-    config?.sinceHeight ??
-    (await database<Bundles>("bundles")
-      .max("block")
-      .where("from_node", "=", url.toString())
-      .first()
-      .then((v) => v?.["max(`block`)"])) ??
-    START_HEIGHT ??
-    (await getNetworkHeight());
+    (config?.sinceHeight ??
+      (await database<Bundles>("bundles")
+        .max("block")
+        .where("from_node", "=", url.toString())
+        .first()
+        .then((v) => v?.["max(`block`)"])) ??
+      START_HEIGHT ??
+      (await getNetworkHeight())) - 51;
 
   logger.verbose(`[getPostedBundles] Syncing from ${sinceHeight} for ${url.toString()}`);
 
