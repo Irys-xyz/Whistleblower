@@ -45,6 +45,8 @@ export async function getPostedBundles(
   let received: GQLRes["data"]["edges"] = [];
   let nextCursor: string | undefined = undefined;
   // TODO: general GQL abstraction & bundler node GQL fallback
+  let postedBundles = 0;
+  let newBundles = 0;
   do {
     const query = ` query {
         transactions (
@@ -74,7 +76,7 @@ export async function getPostedBundles(
     );
     // add bundles to the DB - 0len check for sqlite
     if (filteredTxs.length !== 0) {
-      const newBundles = await database<Bundles>("bundles")
+      const newBundlesCount = await database<Bundles>("bundles")
         .insert(
           filteredTxs.map((v) => ({
             tx_id: v.node.id,
@@ -86,12 +88,11 @@ export async function getPostedBundles(
         )
         .onConflict("tx_id")
         .ignore();
-      logger.info(
-        `[getPostedBundles] Got ${filteredTxs.length} bundles (${newBundles.length} new) for ${url.toString()}`,
-      );
+      newBundles += newBundlesCount.length;
+      postedBundles += filteredTxs.length;
     }
   } while (nextCursor);
-  logger.debug(`[getPostedBundles] completed bundle sync for ${url.toString()}`);
+  logger.info(`[getPostedBundles] Got ${postedBundles} bundles (${newBundles} new) for ${url.toString()}`);
 }
 
 type GQLRes = {
