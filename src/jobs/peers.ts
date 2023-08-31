@@ -11,14 +11,14 @@ export async function crawlForPeers(maxDepth = MAX_PEER_DEPTH): Promise<void> {
 }
 
 async function getPeers(peer: URL, maxDepth: number, depth = 0): Promise<void> {
-  logger.debug(`[getPeers] Getting peers from ${peer} - at depth ${depth}`);
   if (depth >= maxDepth) return;
+  logger.debug(`[getPeers] Getting peers from ${peer} - at depth ${depth}`);
   try {
     const response = await retryRequest(peer + "/peers", { method: "get", timeout: 3000 });
     const peers = (response.data as string[]).map((v) => new URL("http://" + v));
     logger.verbose(`[getPeers] Got ${peers.length} peers from ${peer}`);
     if (peers) await addPeers(peers);
-    for (const p of peers) await getPeers(p, maxDepth, ++depth);
+    for (const p of peers) await getPeers(p, maxDepth, depth + 1);
   } catch (e: any) {
     logger.verbose(`[getPeers] Error occurred while getting peers: ${e}`);
   }

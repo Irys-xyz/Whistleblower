@@ -2,33 +2,34 @@
 import database from "@/db/sqlite";
 import { type Bundles, type Transactions } from "@/types/db";
 import { fmtError } from "@utils";
-import { retryRequest } from "@utils/axios";
-import { GATEWAY_URL } from "@utils/env";
 import logger from "@logger";
 import { downloadTx } from "@utils/txDownloader";
 import { Readable } from "stream";
 import processStream from "@utils/processStream";
 import { alert } from "@utils/alert";
+import { fallbackPeerRequest } from "@utils/peers";
 
 export async function verifyBundle(bundleId: string): Promise<void> {
   try {
     logger.info(`[verifyBundle] Processing bundle ${bundleId}`);
     const then = performance.now();
     // check it's on chain
-    const txStatus = await retryRequest<{ block_height: number; number_of_confirmations: number }>(
-      new URL(`/tx/${bundleId}/status`, GATEWAY_URL),
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const txStatus = await fallbackPeerRequest<{ block_height: number; number_of_confirmations: number } | undefined>(
+      `/tx/${bundleId}/status`,
+      { returnOnAllFailure: true },
     );
 
     // shouldn't happen, usually means the tx isn't fully seeded
     if (txStatus.status !== 200) {
       return void logger.error(`[verifyBundle] Bundle ${bundleId} has a non 200 status code - requeueing`);
     }
-    if (txStatus.data.number_of_confirmations < 50) {
+    if ((txStatus?.data?.number_of_confirmations ?? 0) < 50) {
       return void logger.info(
-        `[verifyBundle] Bundle ${bundleId} has not received the required number of confirmations (${txStatus.data.number_of_confirmations} <50)`,
+        `[verifyBundle] Bundle ${bundleId} has not received the required number of confirmations (${txStatus?.data?.number_of_confirmations} < 50)`,
       );
     }
-
+    logger.verbose(`[verifyBundle] Downloading & processing bundle ${bundleId}`);
     // download and verify data
     const res = await processStream(Readable.from(downloadTx(bundleId))).catch((e: Error) => e);
 

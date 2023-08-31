@@ -1,3 +1,5 @@
+import { type retryRequest } from "@utils/axios";
+import { type Options } from "async-retry";
 export type Config = {
   database?: {
     /**
@@ -21,6 +23,11 @@ export type Config = {
     basePeers?: UrlString[];
     /** The network height WB should start verifying from */
     startHeight?: number;
+  };
+
+  request?: {
+    defaultAxiosConfig?: Parameters<typeof retryRequest>[1];
+    defaultRetryConfig?: Options;
   };
   // bundlers?: Record<
   //   UrlString,
@@ -78,6 +85,13 @@ export type Config = {
      * @default 10
      */
     bundleVerifyConcurrency?: number;
+
+    /**
+     * Number of concurrent orphan transactions to resolve
+     * Increasing this might lead to arweave gateway rate limiting
+     * @default 5
+     */
+    orphanResolveConcurrency?: number;
   };
 
   alert?: {

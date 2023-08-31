@@ -66,6 +66,11 @@ export const START_HEIGHT = config?.arweave?.startHeight;
 export const MAX_TX_AGE = config?.system?.maxTxAgeMs ?? ONE_WEEK;
 export const MAX_BUNDLE_AGE = config?.system?.maxBundleAgeMs ?? ONE_WEEK;
 export const ORPHAN_AGE_THRESHOLD = config?.system?.orphanTxAgeThresholdMs ?? 20 * 2 * 60 * 1000; // 20 blocks (ish)
+export const ORPHAN_RESOLVE_CONCURRENCY =
+  config?.system?.orphanResolveConcurrency ?? 10 < 1 ? 10 : config?.system?.orphanResolveConcurrency ?? 10;
 export const PRESERVE_INVALID = config?.system?.preserveInvalid ?? false;
 export const BUNDLE_VERIFY_CONCURRENCY =
   config?.system?.bundleVerifyConcurrency ?? 10 < 1 ? 10 : config?.system?.bundleVerifyConcurrency ?? 10;
+
+export const DEFAULT_AXIOS_CONFIG = config?.request?.defaultAxiosConfig ?? {};
+export const DEFAULT_REQUEST_RETRY_CONFIG = config?.request?.defaultRetryConfig ?? {};

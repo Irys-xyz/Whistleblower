@@ -1,4 +1,4 @@
-import { registerCrons } from "@/jobs";
+import { registerCrons } from "@/jobs/cron";
 import database from "@/db/sqlite";
 import { type Bundles, type Bundlers } from "@/types/db";
 import { startWsListener } from "@/worker/listener";
