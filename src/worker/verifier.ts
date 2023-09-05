@@ -8,6 +8,7 @@ import { Readable } from "stream";
 import processStream from "@utils/processStream";
 import { alert } from "@utils/alert";
 import { fallbackPeerRequest } from "@utils/peers";
+import BigNumber from "bignumber.js";
 
 export async function verifyBundle(bundleId: string): Promise<void> {
   try {
@@ -30,6 +31,11 @@ export async function verifyBundle(bundleId: string): Promise<void> {
       );
     }
     logger.verbose(`[verifyBundle] Downloading & processing bundle ${bundleId}`);
+
+    // non-critical so we don't care if this req fails - odds are if it does then downloadTx will also fail.
+    const offsetPromise = fallbackPeerRequest<{ offset: number; size: number }>(`/tx/${bundleId}/offset`).catch(
+      (_) => undefined,
+    );
     // download and verify data
     const res = await processStream(Readable.from(downloadTx(bundleId))).catch((e: Error) => e);
 
@@ -88,8 +94,15 @@ export async function verifyBundle(bundleId: string): Promise<void> {
         if (diff > 0)
           logger.warn(`[verifyBundle] Bundle ${bundleId} has ${diff} unaccounted for txs (missed by listener)`);
       }
+      const size = await offsetPromise;
+      const timeTaken = (performance.now() - then) / 1000;
+      const MBps = size?.data
+        ? new BigNumber(size.data.size).dividedBy(1_000_000).dividedBy(timeTaken).toFixed(3)
+        : undefined;
 
-      logger.verbose(`[verifyBundle] Finished processing ${bundleId} - took ${(performance.now() - then) / 1000}s`);
+      logger.verbose(
+        `[verifyBundle] Finished processing ${bundleId} - took ${timeTaken}s ${MBps ? `(${MBps}MB/s)` : ""}`,
+      );
     }
   } catch (e: any) {
     logger.error(`[verifyBundle] Error verifying ${bundleId} - ${fmtError(e)}`);
