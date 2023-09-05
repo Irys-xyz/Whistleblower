@@ -53,7 +53,7 @@ export async function resolveOrphanTx(orphan: Pick<Transactions, "tx_id">): Prom
   const bundledInId = res.data.data.transaction.bundledIn?.id;
   if (!blockInfo) return void logger.verbose(`[resolveOrphanTx] Block is null for ${orphan.tx_id} - delaying`);
   if (!bundledInId)
-    return void logger.warn(`[resolveOprhanTx] Unable to find parent bundle for ${orphan.tx_id} - delaying`);
+    return void logger.warn(`[resolveOrphanTx] Unable to find parent bundle for ${orphan.tx_id} - delaying`);
   // get owner of the bundle from L1
   const ownerQuery = `
         query {

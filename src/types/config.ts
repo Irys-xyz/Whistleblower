@@ -104,6 +104,8 @@ export type Config = {
     // custom options
     [k: string]: any;
   };
+
+  custom?: Record<string, any>;
 };
 
 export type UrlString = `${"http" | "https"}://${string}`;
