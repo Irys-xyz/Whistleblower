@@ -47,13 +47,13 @@ process.on("unhandledRejection", (reason, promise) => {
     .then((v) => v?.["max(`block`)"]);
   if (latestHeight)
     logger.info(
-      `Last recorded network height: ${latestHeight}, current height: ${nowHeight} - catching up ${
+      `[Whistleblower] Last recorded network height: ${latestHeight}, current height: ${nowHeight} - catching up ${
         nowHeight - latestHeight
       } blocks`,
     );
 
   for (const bundlerUrl of bundlers) {
-    logger.info(`Starting listener for ${bundlerUrl.host}`);
+    logger.info(`[Whistleblower] Starting listener for ${bundlerUrl.host}`);
     await startWsListener(`ws://${bundlerUrl.host}`);
   }
 
