@@ -1,10 +1,10 @@
 # Whistleblower
 
-Whistleblower is a lightweight, fully-featured transaction and bundle verifier that allows anyone to monitor a Bundlr node and ensure transactions are finalized on Arweave.
+Whistleblower is a lightweight, fully-featured transaction and bundle verifier that allows anyone to monitor a Irys node and ensure transactions are finalized on Arweave.
 
 ![](https://github.com/Bundlr-Network/Whistleblower/blob/master/assets/whistleblower.png?raw=true)
 
-Whistleblower monitors transactions uploaded to Bundlr and their finalization on Arweave. For each upload, Whistleblower checks the assigned deadline height - the block number by which a transaction must be finalized - and ensures it’s finalized by this block number. Acting as a bridge between Bundlr nodes and Arweave, it matches uploaded transactions with finalized ones, and triggers alerts if any transaction misses its deadline.
+Whistleblower monitors transactions uploaded to Irys and their finalization on Arweave. For each upload, Whistleblower checks the assigned deadline height - the block number by which a transaction must be finalized - and ensures it’s finalized by this block number. Acting as a bridge between Irys nodes and Arweave, it matches uploaded transactions with finalized ones, and triggers alerts if any transaction misses its deadline.
 
 With Whistleblower, you can ensure that:
 
@@ -15,7 +15,7 @@ With Whistleblower, you can ensure that:
 ## How 
 
 
-Whistleblower sets up WebSocket connections with Bundlr's nodes, tracking and adding all transactions uploaded to these nodes into its database.
+Whistleblower sets up WebSocket connections with Irys' nodes, tracking and adding all transactions uploaded to these nodes into its database.
 
 Whistleblower periodically checks Arweave for finalized bundles, downloads them, and verifies their contents. Tracked transactions within a bundle are verified and marked as valid or invalid.
 
@@ -53,13 +53,13 @@ You can run Whistleblower using either yarn or npm. Start by initializing it wit
 ### Via yarn
 
 ```console
-yarn wb-init --nodes https://node1.bundlr.network https://node2.bundlr.network 
+yarn wb-init --nodes https://node1.irys.xyz https://node2.irys.xyz 
 yarn restart 
 ```
 
 ### Via npm
 
 ```console
-npm run init-wb -- -n https://node1.bundlr.network https://node2.bundlr.network
+npm run init-wb -- -n https://node1.irys.xyz https://node2.irys.xyz
 npm run restart 
 ```
