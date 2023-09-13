@@ -37,7 +37,15 @@ export async function verifyBundle(bundleId: string): Promise<void> {
       (_) => undefined,
     );
     // download and verify data
-    const res = await processStream(Readable.from(downloadTx(bundleId))).catch((e: Error) => e);
+    let res;
+    try {
+      const chunkGen = downloadTx(bundleId);
+      const readable = Readable.from(chunkGen);
+      res = await processStream(readable);
+    } catch (e) {
+      console.error(e);
+      return;
+    }
 
     if (res instanceof Error) {
       // add specific exception to request peer exhaustion
@@ -101,7 +109,9 @@ export async function verifyBundle(bundleId: string): Promise<void> {
         : undefined;
 
       logger.verbose(
-        `[verifyBundle] Finished processing ${bundleId} - took ${timeTaken}s ${MBps ? `(${MBps}MB/s)` : ""}`,
+        `[verifyBundle] Finished processing ${bundleId} - took ${timeTaken}s ${
+          size?.data ? `${new BigNumber(size.data.size).dividedBy(1_000_000).toFixed(3)}MB` : ""
+        } ${MBps ? `(${MBps}MB/s)` : ""}`,
       );
     }
   } catch (e: any) {

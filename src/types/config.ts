@@ -28,6 +28,7 @@ export type Config = {
   request?: {
     defaultAxiosConfig?: Parameters<typeof retryRequest>[1];
     defaultRetryConfig?: Options;
+    defaultDownloadTxConcurrency?: number;
   };
   // bundlers?: Record<
   //   UrlString,

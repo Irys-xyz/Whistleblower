@@ -1,6 +1,7 @@
 import BigNumber from "bignumber.js";
 import { fallbackPeerRequest } from "./peers";
 import logger from "@logger";
+import { config } from "./env";
 
 // arweave chunk size
 const CHUNK_SIZE = 256 * 1024;
@@ -14,9 +15,9 @@ const CHUNK_SIZE = 256 * 1024;
 export async function* downloadTx(
   txId: string,
   options?: { concurrency?: number; fallbackRequestConfig?: Parameters<typeof fallbackPeerRequest>[1] },
-): AsyncGenerator<Buffer> {
+): AsyncGenerator<Buffer | Error> {
   // default concurrency to 100 as the chunks are *tiny* (256kib)
-  const opts = { concurrency: 100, ...options };
+  const opts = { concurrency: config?.request?.defaultDownloadTxConcurrency ?? 100, ...options };
   try {
     const metadata = await fallbackPeerRequest<{ offset: number; size: number }>(`/tx/${txId}/offset`);
 
@@ -27,16 +28,25 @@ export async function* downloadTx(
     let processedBytes = 0;
 
     const chunks = Math.ceil(size.dividedBy(CHUNK_SIZE).toNumber());
-
-    const getChunk = async (offset: BigNumber): Promise<Buffer> =>
-      fallbackPeerRequest<{ chunk: string }>(`/chunk/${offset.toString()}`, opts.fallbackRequestConfig).then((r) => {
+    // throw new Error("test")
+    const getChunk = async (offset: BigNumber): Promise<Buffer | Error> => {
+      try {
+        // throw new Error("test");
+        const r = await fallbackPeerRequest<{ chunk: string }>(
+          `/chunk/${offset.toString()}`,
+          opts.fallbackRequestConfig,
+        );
         const b = Buffer.from(r.data.chunk, "base64url");
         logger.debug(`[getChunk] offset ${offset.toString()} size ${b.length}`);
         processedBytes += b.length;
         return b;
-      });
+      } catch (e) {
+        console.error(e);
+        return e as Error;
+      }
+    };
 
-    const processing: Promise<Buffer>[] = [];
+    const processing: ReturnType<typeof getChunk>[] = [];
     // only parallelise everything except last two chunks.
     // last two due to merkle rebalancing due to minimum chunk size, see https://github.com/ArweaveTeam/arweave-js/blob/ce441f8d4e66a2524cfe86bbbcaed34b887ba193/src/common/lib/merkle.ts#LL53C19-L53C19
     const parallelChunks = chunks - 2;
@@ -53,20 +63,20 @@ export async function* downloadTx(
     while (currChunk < parallelChunks) {
       processing.push(getChunk(startOffset.plus(CHUNK_SIZE * currChunk++)));
       // yield await so that processedBytes works properly
-      yield processing.shift()!;
+      yield await processing.shift()!;
     }
 
-    while (processing.length > 0) yield processing.shift()!;
+    while (processing.length > 0) yield await processing.shift()!;
 
-    yield getChunk(startOffset.plus(CHUNK_SIZE * currChunk++));
-    if (size.isGreaterThan(processedBytes)) yield getChunk(startOffset.plus(CHUNK_SIZE * currChunk++));
+    yield await getChunk(startOffset.plus(CHUNK_SIZE * currChunk++));
+    if (size.isGreaterThan(processedBytes)) yield await getChunk(startOffset.plus(CHUNK_SIZE * currChunk++));
 
     if (!size.isEqualTo(processedBytes)) throw new Error(`got ${processedBytes}B, expected ${size.toString()}B`);
 
     return;
   } catch (e: unknown) {
     if (e instanceof Error) {
-      e.message = "fallbackPeerRequest: " + e.message;
+      e.message = "[downloadTx] " + e.message;
     }
     throw e;
   }

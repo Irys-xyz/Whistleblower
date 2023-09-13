@@ -126,8 +126,6 @@ export default async function processStream(stream: Readable): Promise<{
       2 + sigLength + pubLength + (targetPresent ? 33 : 1) + (anchorPresent ? 33 : 1) + 16 + tagsBytesLength;
     const dataSize = length - dataOffset;
 
-    offsetSum += offsetSum + dataOffset + dataSize;
-
     // anything past this is recoverable
     try {
       bytes = await readBytes(reader, bytes, tagsBytesLength);
@@ -184,7 +182,7 @@ export default async function processStream(stream: Readable): Promise<{
 
       if (!(await Signer.verify(owner, (await signatureData) as any, signature))) throw new Error("Invalid signature");
 
-      /*  items.push( */ return {
+      /*  items.push( */ const item = {
         id,
         sigName,
         signature: base64url(Buffer.from(signature)),
@@ -195,6 +193,9 @@ export default async function processStream(stream: Readable): Promise<{
         dataOffset: offsetSum + dataOffset,
         dataSize,
       };
+
+      offsetSum += dataOffset + dataSize;
+      return item;
     } catch (e) {
       return e as Error;
     }
@@ -207,7 +208,7 @@ export default async function processStream(stream: Readable): Promise<{
       errors.push({ id, error: res });
     } else {
       items.push(res);
-      offsetSum += res.dataOffset + res.dataSize;
+      // offsetSum += res.dataOffset + res.dataSize;
     }
   }
 
@@ -226,6 +227,7 @@ async function readBytes(reader: AsyncGenerator<Buffer>, buffer: Uint8Array, len
 
 async function* getReader(s: Readable): AsyncGenerator<Buffer> {
   for await (const chunk of s) {
+    if (chunk instanceof Error) throw chunk;
     yield chunk;
   }
 }

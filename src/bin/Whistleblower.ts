@@ -5,6 +5,7 @@ import { startWsListener } from "@/worker/listener";
 import logger from "@logger";
 import { getNetworkHeight } from "@utils/arweave";
 import { inspect } from "util";
+import "@utils/elu";
 
 process.on("uncaughtException", (error, origin) => {
   logger.error(`[Whistleblower:trap] Caught UncaughtException ${error} - ${inspect(origin)}`);
