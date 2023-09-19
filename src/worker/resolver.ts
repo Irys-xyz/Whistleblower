@@ -12,12 +12,20 @@ import PromisePool from "@supercharge/promise-pool/dist";
 
 export async function resolveOrphanTxs(/* orphanAgeThreshold = ORPHAN_AGE_THRESHOLD */): Promise<void> {
   const height = await getNetworkHeight();
+
+  // get the oldest unindexed bundle, don't check anything after this.
+  const bundleIndexedUntilHeight = await database<Bundles>("bundles")
+    .min("block")
+    .whereNull("is_valid")
+    .first()
+    .then((r) => r?.min ?? 0);
+
   // an orphan tx is a tx without a defined parent bundle -
   // we catch these 20 blocks before they expire
   const orphans = await database<Transactions>("transactions")
     .select(["tx_id", "deadline_height"])
     .whereNull("bundled_in")
-    .andWhere("deadline_height", "<", height + 20)
+    .andWhere("deadline_height", "<", Math.min(height + 20, bundleIndexedUntilHeight))
     .orderBy("deadline_height", "asc");
 
   if (orphans.length === 0) return;

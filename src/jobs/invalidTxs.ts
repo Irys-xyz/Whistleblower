@@ -6,12 +6,19 @@ import { alert } from "@utils/alert";
 
 export async function processInvalidTxs(): Promise<any> {
   const height = await getNetworkHeight();
+  // get the oldest unindexed bundle, don't check anything after this.
+  const bundleIndexedUntilHeight = await database<Bundles>("bundles")
+    .min("block")
+    .whereNull("is_valid")
+    .first()
+    .then((r) => r?.min ?? 0);
+
   // these txs have passed their deadline height without being validated
   // group by bundled_in
   const invalidHeightTxs = await database<Transactions>("transactions")
     .select("*")
     .where("is_valid", "<>", true)
-    .andWhere("deadline_height", "<", height)
+    .andWhere("deadline_height", "<", Math.min(height, bundleIndexedUntilHeight))
     .whereNull("date_verified")
     .orderBy("bundled_in");
 

@@ -31,7 +31,12 @@ export async function fallbackPeerRequest<T = any, R = AxiosResponse<T>>(
     // format is url, base
     const peerUrl = new URL(url, peers[i]);
     const res = await retryRequest<T, R>(peerUrl.toString(), { retry: { retries: 1 }, ...config }).catch((e) => {
-      if (DEBUG) logger.debug(`[fallbackPeerRequest] Error getting ${peerUrl.toString()} - ${e.message}`);
+      if (DEBUG)
+        logger.debug(
+          `[fallbackPeerRequest] Error getting ${peerUrl.toString()} - ${e.message}${
+            e.response.headers ? " - " + e.response.headers : ""
+          }`,
+        );
       oRes = e.response;
       return undefined;
     });
@@ -71,20 +76,42 @@ export async function peerRequest<T = any, R = AxiosResponse<T>>(
 }
 
 export async function getPeers(count = 10, random = true): Promise<URL[]> {
-  const query = database<Peers>("peers")
-    .select("url")
-    .where("url", "<>", GATEWAY_URL.toString())
-    .orderBy("trust", "desc")
-    .limit(count);
+  const query = random
+    ? `select * from (select * from peers order by trust desc limit ${Math.ceil(
+        count / 2,
+      )}) union select * from (select * from peers order by RANDOM() limit ${Math.ceil(count / 2)})`
+    : `select * from peers order by trust desc limit ${count}`;
+  // const q = database<Peers>("peers").select("*").where("url", "<>", GATEWAY_URL.toString()).orderBy("trust", "desc");
+  // if (random) {
+  //   q.limit(Math.ceil(count / 2)).union([
+  //     function (): void {
+  //       this.select("*")
+  //         .where("url", "<>", GATEWAY_URL.toString())
+  //         .limit(Math.ceil(count / 2))
+  //         .orderByRaw(`RANDOM()`);
+  //     },
+  //   ]);
+  // } else {
+  //   q.limit(count);
+  // }
+
+  // const query = database<Peers>("peers")
+  //   .select("url")
+  //   .where("url", "<>", GATEWAY_URL.toString())
+  //   .orderBy("trust", "desc")
+  //   .limit(count);
+  // const query = database.raw(`
+  // select * from (select * from peers order by trust desc limit 10) union select * from (select * from peers order by RANDOM() limit 4);
+  // `)
   // if (random)
-  let qRes = await query;
+  let qRes = await database.raw(query);
   if (random) qRes = shuffleArray(qRes);
   return qRes.map((p) => new URL(p.url));
 }
 
 export const penalisePeers = (peers: URL[]): Promise<void[]> => Promise.all(peers.map(async (p) => penalisePeer(p)));
 
-export async function penalisePeer(peer: URL, decrease = 5): Promise<void> {
+export async function penalisePeer(peer: URL, decrease = 2): Promise<void> {
   // decrease trust by `decrease` until 0
   const oldTrust = await database<Peers>("peers")
     .select("trust")

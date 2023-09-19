@@ -11,13 +11,16 @@ export async function registerCrons(): Promise<void> {
   createCron("Crawl for peers", "*/30 * * * * *", crawlForPeers);
   createCron("Prune old txs", "15 */1 * * * *", pruneOldTxs);
   createCron("Prune old bundles", "45 */5 * * * *", pruneOldBundles);
-  createCron("Verification chain", "0 */1 * * * *", async () => {
-    // do these in order so we don't have issues with race conditions between verification steps on slower instances
-    await getAllNodePostedBundles(); // get all bundles
-    await verifyBundles(); // index all bundles
-    await resolveOrphanTxs(); // locate orphans
-    await processInvalidTxs(); // process any invalid txs
-  });
+  createCron("Verify bundles", "*/15 * * * * *", verifyBundles);
+  createCron("Resolve orphan transactions", "0 */1 * * * *", resolveOrphanTxs);
+  createCron("Process invalid transactions", "0 */1 * * * *", processInvalidTxs);
+
+  // createCron("Verification chain", "0 */1 * * * *", async () => {
+  //   // do these in order so we don't have issues with race conditions between verification steps on slower instances
+  //   await verifyBundles(); // index all bundles
+  //   await resolveOrphanTxs(); // locate orphans
+  //   await processInvalidTxs(); // process any invalid txs
+  // });
   createCron("Get posted bundles", "*/30 * * * * * ", getAllNodePostedBundles);
 }
 

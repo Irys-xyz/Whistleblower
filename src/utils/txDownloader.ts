@@ -32,12 +32,19 @@ export async function* downloadTx(
     const getChunk = async (offset: BigNumber): Promise<Buffer | Error> => {
       try {
         // throw new Error("test");
+        const then = performance.now();
         const r = await fallbackPeerRequest<{ chunk: string }>(
           `/chunk/${offset.toString()}`,
           opts.fallbackRequestConfig,
         );
         const b = Buffer.from(r.data.chunk, "base64url");
-        logger.debug(`[getChunk] offset ${offset.toString()} size ${b.length}`);
+        logger.debug(
+          `[getChunk]  ${txId} offset ${offset.toString()} size ${b.length} ${new BigNumber(processedBytes)
+            .dividedBy(size)
+            .multipliedBy(100)
+            .toFixed(2)
+            .toString()} % (${processedBytes}/${size.toString()}) - took ${(performance.now() - then).toFixed(3)}ms`,
+        );
         processedBytes += b.length;
         return b;
       } catch (e) {
@@ -63,13 +70,13 @@ export async function* downloadTx(
     while (currChunk < parallelChunks) {
       processing.push(getChunk(startOffset.plus(CHUNK_SIZE * currChunk++)));
       // yield await so that processedBytes works properly
-      yield await processing.shift()!;
+      yield processing.shift()!;
     }
 
-    while (processing.length > 0) yield await processing.shift()!;
+    while (processing.length > 0) yield processing.shift()!;
 
-    yield await getChunk(startOffset.plus(CHUNK_SIZE * currChunk++));
-    if (size.isGreaterThan(processedBytes)) yield await getChunk(startOffset.plus(CHUNK_SIZE * currChunk++));
+    yield getChunk(startOffset.plus(CHUNK_SIZE * currChunk++));
+    if (size.isGreaterThan(processedBytes)) yield getChunk(startOffset.plus(CHUNK_SIZE * currChunk++));
 
     if (!size.isEqualTo(processedBytes)) throw new Error(`got ${processedBytes}B, expected ${size.toString()}B`);
 

@@ -1,6 +1,7 @@
 import axios, { type AxiosRequestConfig, type AxiosResponse } from "axios";
 import retry from "async-retry";
-import { DEFAULT_AXIOS_CONFIG, DEFAULT_REQUEST_RETRY_CONFIG } from "./env";
+import { DEBUG, DEFAULT_AXIOS_CONFIG, DEFAULT_REQUEST_RETRY_CONFIG } from "./env";
+import logger from "@logger";
 
 /**
  * async-retry wrapped axios static request method.
@@ -16,7 +17,16 @@ export async function retryRequest<T = any, R = AxiosResponse<T>>(
   config = { ...DEFAULT_AXIOS_CONFIG, ...config };
   return retry(
     async (_) => {
-      return await axios<T, R>(url.toString(), config);
+      const then = performance.now();
+      const r = await axios<T, R>(url.toString(), config).catch((e) => e);
+      if (DEBUG)
+        logger.debug(
+          `[retryRequest] ${r.config.method?.toUpperCase()} ${url.toString()} status ${r?.status ?? r?.code} took ${
+            performance.now() - then
+          }ms`,
+        );
+      if (r instanceof Error) throw r;
+      return r;
     },
     { ...DEFAULT_REQUEST_RETRY_CONFIG, ...config.retry },
   );

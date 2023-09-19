@@ -88,6 +88,12 @@ export type Config = {
     bundleVerifyConcurrency?: number;
 
     /**
+     * Number of tasks to run per thread, by default the max number
+     * of threads is set to bundleVerifyConcurrency, so this value will multiply the throughput
+     */
+    bundleVerifyTasksPerThread?: number;
+
+    /**
      * Number of concurrent orphan transactions to resolve
      * Increasing this might lead to arweave gateway rate limiting
      * @default 5
