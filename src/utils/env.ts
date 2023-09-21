@@ -2,8 +2,8 @@ import { statSync, mkdirSync } from "fs";
 import { resolve } from "path";
 import { type Config } from "@/types/config";
 import { type ApiConfig } from "arweave/node/lib/api";
+import { ONE_DAY, ONE_WEEK } from "./constants";
 
-export const ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
 export const IS_TS = !!process[Symbol.for("ts-node.register.instance")];
 
 // TODO: use Zod for validation
@@ -63,7 +63,7 @@ export const GATEWAY_CONFIG: ApiConfig = {
 export const TX_DEADLINE_OFFSET = config?.system?.txDeadlineOffset ?? 1000;
 export const MAX_PEER_DEPTH = config?.system?.maxPeerDepth ?? 2;
 export const START_HEIGHT = config?.arweave?.startHeight;
-export const MAX_TX_AGE = config?.system?.maxTxAgeMs ?? ONE_WEEK;
+export const MAX_TX_AGE = config?.system?.maxTxAgeMs ?? ONE_DAY;
 export const MAX_BUNDLE_AGE = config?.system?.maxBundleAgeMs ?? ONE_WEEK;
 export const ORPHAN_AGE_THRESHOLD = config?.system?.orphanTxAgeThresholdMs ?? 20 * 2 * 60 * 1000; // 20 blocks (ish)
 export const ORPHAN_RESOLVE_CONCURRENCY =

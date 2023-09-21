@@ -31,12 +31,7 @@ export async function fallbackPeerRequest<T = any, R = AxiosResponse<T>>(
     // format is url, base
     const peerUrl = new URL(url, peers[i]);
     const res = await retryRequest<T, R>(peerUrl.toString(), { retry: { retries: 1 }, ...config }).catch((e) => {
-      if (DEBUG)
-        logger.debug(
-          `[fallbackPeerRequest] Error getting ${peerUrl.toString()} - ${e.message}${
-            e.response.headers ? " - " + e.response.headers : ""
-          }`,
-        );
+      if (DEBUG) logger.debug(`[fallbackPeerRequest] Error getting ${peerUrl.toString()} - ${e.message}`);
       oRes = e.response;
       return undefined;
     });

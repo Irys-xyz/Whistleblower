@@ -6,14 +6,22 @@ import logger from "@logger";
 import { getNetworkHeight } from "@utils/arweave";
 import { inspect } from "util";
 import "@utils/elu";
+import { sleep } from "@utils";
+import { registerHandler } from "segfault-handler";
 
 process.on("uncaughtException", (error, origin) => {
   logger.error(`[Whistleblower:trap] Caught UncaughtException ${error} - ${inspect(origin)}`);
-  process.exit(1);
+  sleep(2_000).then((_) => process.exit(1));
 });
 process.on("unhandledRejection", (reason, promise) => {
   logger.error(`[Whistleblower:trap] Caught unhandledRejection ${reason} - ${inspect(promise)}`);
-  process.exit(1);
+  sleep(2_000).then((_) => process.exit(1));
+});
+
+registerHandler("crash.log", function (signal, address, stack) {
+  // Do what you want with the signal, address, or stack (array)
+  // This callback will execute before the signal is forwarded on.
+  console.error(`SEGFAULT ${signal} ${address} ${stack}`);
 });
 
 (async function (): Promise<void> {
@@ -28,6 +36,7 @@ process.on("unhandledRejection", (reason, promise) => {
   `);
   const bundlers = await database<Bundlers>("bundlers")
     .select("url")
+    .queryContext({ timeout: 1_000 })
     .then((v) => v.map((u) => new URL(u.url)))
     .catch((e) => e);
 
@@ -61,5 +70,5 @@ process.on("unhandledRejection", (reason, promise) => {
   await registerCrons();
 })().catch((e) => {
   logger.error(`[Whistleblower:catch] Caught error ${e}`);
-  process.exit(1);
+  sleep(2_000).then((_) => process.exit(1));
 });
