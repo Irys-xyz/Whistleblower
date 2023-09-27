@@ -1,25 +1,17 @@
 # Whistleblower
 
-Whistleblower is a lightweight, fully-featured transaction and bundle verifier that allows anyone to monitor a Irys node and ensure transactions are finalized on Arweave.
+
+![](https://github.com/Bundlr-Network/Whistleblower/blob/master/assets/irys-whistleblower.png?raw=true)
+
+Whistleblower is a lightweight tool for monitoring transactions uploaded to Irys and verifying their finalization on Arweave. It cross-references uploaded transactions with finalized ones and triggers an alert if a transaction misses its finalization deadline. Whistleblower can be easily deployed on any computer with a single command argument, making transaction monitoring both simple and robust.
 
 ![](https://github.com/Bundlr-Network/Whistleblower/blob/master/assets/whistleblower.png?raw=true)
-
-Whistleblower monitors transactions uploaded to Irys and their finalization on Arweave. For each upload, Whistleblower checks the assigned deadline height - the block number by which a transaction must be finalized - and ensures it’s finalized by this block number. Acting as a bridge between Irys nodes and Arweave, it matches uploaded transactions with finalized ones, and triggers alerts if any transaction misses its deadline.
 
 With Whistleblower, you can ensure that:
 
 - Transactions are finalized on Arweave by their deadline height (the block number by which the transaction must be finalized on Arweave).
 - Transactions have valid formats and signatures.
 - Bundles have valid formats and signatures.
-
-## How 
-
-
-Whistleblower sets up WebSocket connections with Irys' nodes, tracking and adding all transactions uploaded to these nodes into its database.
-
-Whistleblower periodically checks Arweave for finalized bundles, downloads them, and verifies their contents. Tracked transactions within a bundle are verified and marked as valid or invalid.
-
-If a transaction is invalidated or doesn't get finalized by its deadline height, an alert is issued.
 
 
 ## Alerts
@@ -28,13 +20,13 @@ By default, Whistleblower sends alerts via the CLI if a transaction isn't finali
 
 ```js
 export default async function alert(alert: Alert): Promise<void> {
-   // Add your custom alert code here!
+   // Add your custom alert code here
 }
 ```
 
 ## Configuration
 
-Whistleblower is designed to be user-friendly and requires minimal configuration. However, if you need to customize its behavior, rename [example.config.ts](/Whistleblower/blob/master/example.config.ts) file to `config.ts` and modify as needed. A heavily commented example implementation [can be found here](/Whistleblower/blob/master/src/types/config.ts).
+Whistleblower requires minimal configuration. If you need to customize its behavior, rename [example.config.ts](/Whistleblower/blob/master/example.config.ts) file to `config.ts` and modify as needed. A heavily commented example implementation [can be found here](/Whistleblower/blob/master/src/types/config.ts).
 
 ## Installation
 
