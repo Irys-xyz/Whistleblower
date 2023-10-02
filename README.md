@@ -14,7 +14,7 @@ With Whistleblower, you can ensure that:
 
 ## Whistleblower step-by-step
 
-![](https://github.com/Bundlr-Network/Whistleblower/blob/master/assets/irys-whistleblower-step-by-step.png?raw=true)
+![](https://github.com/Bundlr-Network/Whistleblower/blob/master/assets/irys-whistleblower.png?raw=true)
 
 Launch Whistleblower from your CLI and select the nodes you want to monitor.
 Whistleblower then:
