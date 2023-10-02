@@ -1,7 +1,7 @@
 # Whistleblower
 
 
-![](https://github.com/Bundlr-Network/Whistleblower/blob/master/assets/whistleblower.png?raw=true)
+![](https://github.com/Bundlr-Network/Whistleblower/blob/master/assets/irys-whistleblower.png?raw=true)
 
 Whistleblower is a lightweight tool for monitoring transactions uploaded to Irys and verifying their finalization on Arweave. It cross-references uploaded transactions with finalized ones and triggers an alert if a transaction misses its finalization deadline. Whistleblower can be easily deployed on any computer with a single command argument, making transaction monitoring both simple and accessible.
 
@@ -14,6 +14,9 @@ With Whistleblower, you can ensure that:
 
 
 ## Whistleblower step-by-step
+
+![](https://github.com/Bundlr-Network/Whistleblower/blob/master/assets/irys-whistleblower-steps.png?raw=true)
+
 Start by launching Whistleblower via your CLI and select the nodes you want to monitor.
 Whistleblower then:
 1. Initializes WebSocket connections to each of the selected nodes for real-time monitoring.
