@@ -20,11 +20,12 @@ With Whistleblower, you can ensure that:
 
 
 Launch Whistleblower from your CLI and select the nodes you want to monitor.
+
 Whistleblower then:
 1. Initializes WebSocket connections to each of the selected nodes for real-time monitoring.
 2. Connects to an Arweave gateway to retrieve all [bundles](https://docs.irys.xyz/learn/bundles) associated with the nodes being tracked.
 3. Connects to Arweave miners, making sure it can download the entire [bundle](https://docs.irys.xyz/learn/bundles).
-4. Traverses through each transaction within a [bundle](https://docs.irys.xyz/learn/bundles), ensuring that it can both download and cryptographically verify each one.
+4. Traverses through each transaction within a [bundle](https://docs.irys.xyz/learn/bundles), ensuring that it can both download and cryptographically verify each one
 5. Triggers an alert if a transaction cannot be downloaded or verified prior to reaching its deadline height.
 
 
