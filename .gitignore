@@ -6,3 +6,5 @@ build
 db/*
 .vscode
 /config.ts
+.DS_Store
+/assets/.DS_Store

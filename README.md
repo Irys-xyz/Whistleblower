@@ -1,6 +1,7 @@
+
 # Whistleblower
 
-![](https://github.com/Bundlr-Network/Whistleblower/blob/master/assets/irys-whistleblower.png?raw=true)
+![](https://github.com/Bundlr-Network/Whistleblower/blob/master/assets/whistleblower.png?raw=true)
 
 Whistleblower is a lightweight tool for monitoring [transactions uploaded to Irys](https://docs.irys.xyz/learn/transaction-lifecycle) and verifying they are finalized on Arweave and seeded to miners. Whistleblower can be easily deployed on any computer with a single command, making transaction monitoring both simple and accessible.
 
@@ -14,15 +15,17 @@ With Whistleblower, you can ensure that:
 
 ## Whistleblower step-by-step
 
-![](https://github.com/Bundlr-Network/Whistleblower/blob/master/assets/irys-whistleblower-step-by-step.png?raw=true)
+
+![](https://github.com/Bundlr-Network/Whistleblower/blob/feat/misc/assets/whistleblower-steps.png?raw=true)
+
 
 Launch Whistleblower from your CLI and select the nodes you want to monitor.
 Whistleblower then:
 1. Initializes WebSocket connections to each of the selected nodes for real-time monitoring.
 2. Connects to an Arweave gateway to retrieve all [bundles](https://docs.irys.xyz/learn/bundles) associated with the nodes being tracked.
 3. Connects to Arweave miners, making sure it can download the entire [bundle](https://docs.irys.xyz/learn/bundles).
-5. Traverses through each transaction within a [bundle](https://docs.irys.xyz/learn/bundles), ensuring that it can both download and cryptographically verify each one.
-6. Triggers an alert if a transaction cannot be downloaded or verified prior to reaching its deadline height.
+4. Traverses through each transaction within a [bundle](https://docs.irys.xyz/learn/bundles), ensuring that it can both download and cryptographically verify each one.
+5. Triggers an alert if a transaction cannot be downloaded or verified prior to reaching its deadline height.
 
 
 ## Whistleblower failure modes
