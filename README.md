@@ -1,65 +1,77 @@
 # Whistleblower
 
-Whistleblower is a lightweight, fully-featured transaction and bundle verifier that allows anyone to monitor a Bundlr node and ensure transactions are finalized on Arweave.
+![](https://github.com/Bundlr-Network/Whistleblower/blob/master/assets/irys-whistleblower.png?raw=true)
 
-![](https://github.com/Bundlr-Network/Whistleblower/blob/master/assets/whistleblower.png?raw=true)
-
-Whistleblower monitors transactions uploaded to Bundlr and their finalization on Arweave. For each upload, Whistleblower checks the assigned deadline height - the block number by which a transaction must be finalized - and ensures it’s finalized by this block number. Acting as a bridge between Bundlr nodes and Arweave, it matches uploaded transactions with finalized ones, and triggers alerts if any transaction misses its deadline.
+Whistleblower is a lightweight tool for monitoring [transactions uploaded to Irys](https://docs.irys.xyz/learn/transaction-lifecycle) and verifying they are finalized on Arweave and seeded to miners. Whistleblower can be easily deployed on any computer with a single command, making transaction monitoring both simple and accessible.
 
 With Whistleblower, you can ensure that:
 
 - Transactions are finalized on Arweave by their deadline height (the block number by which the transaction must be finalized on Arweave).
 - Transactions have valid formats and signatures.
-- Bundles have valid formats and signatures.
+- [Bundles](https://docs.irys.xyz/learn/bundles) have valid formats and signatures.
+- Data uploaded is seeded to Arweave miners.
 
-## How 
+
+## Whistleblower step-by-step
+
+![](https://github.com/Bundlr-Network/Whistleblower/blob/master/assets/irys-whistleblower-step-by-step.png?raw=true)
+
+Launch Whistleblower from your CLI and select the nodes you want to monitor.
+Whistleblower then:
+1. Initializes WebSocket connections to each of the selected nodes for real-time monitoring.
+2. Connects to an Arweave gateway to retrieve all [bundles](https://docs.irys.xyz/learn/bundles) associated with the nodes being tracked.
+3. Connects to Arweave miners, making sure it can download the entire [bundle](https://docs.irys.xyz/learn/bundles).
+5. Traverses through each transaction within a [bundle](https://docs.irys.xyz/learn/bundles), ensuring that it can both download and cryptographically verify each one.
+6. Triggers an alert if a transaction cannot be downloaded or verified prior to reaching its deadline height.
 
 
-Whistleblower sets up WebSocket connections with Bundlr's nodes, tracking and adding all transactions uploaded to these nodes into its database.
+## Whistleblower failure modes
+Whistleblower cares that a transaction is in a [bundle](https://docs.irys.xyz/learn/bundles) and that bundle is onchain.
+As it tracks the status of each transaction, an alert will be triggered if:
 
-Whistleblower periodically checks Arweave for finalized bundles, downloads them, and verifies their contents. Tracked transactions within a bundle are verified and marked as valid or invalid.
 
-If a transaction is invalidated or doesn't get finalized by its deadline height, an alert is issued.
-
+1. Whistleblower can't download and verify a transaction by its deadline height.
+2. A transaction is invalid by its deadline height.
+3. A [bundle](https://docs.irys.xyz/learn/bundles) is found to be invalid:
+1. Because it can't be cryptographically verified.
+2. Because Whistleblower can't download the full [bundle](https://docs.irys.xyz/learn/bundles).
+4. A transaction is invalid:
+   1. Because it hasn't been verified by its deadline height.
+   2. Because it's orphaned, Whistleblower is tracking it, but it hasn't showed in any posted [bundle](https://docs.irys.xyz/learn/bundles).
+   3. A transaction is included in a [bundle](https://docs.irys.xyz/learn/bundles) tagged as invalid.
 
 ## Alerts
 
 By default, Whistleblower sends alerts via the CLI if a transaction isn't finalized by its deadline height. To create a custom alert, write a class implementing [this interface](/Whistleblower/blob/master/src/utils/alert.ts), and include your custom behavior in the alert function shown below. There's also [an example implementation](/Whistleblower/blob/master/alert.ts) demonstrating how to set up an alert using [PagerDuty](https://www.pagerduty.com/).
 
+
 ```js
 export default async function alert(alert: Alert): Promise<void> {
-   // Add your custom alert code here!
+// Add your custom alert code here!
 }
 ```
 
 ## Configuration
 
-Whistleblower is designed to be user-friendly and requires minimal configuration. However, if you need to customize its behavior, rename [example.config.ts](/Whistleblower/blob/master/example.config.ts) file to `config.ts` and modify as needed. A heavily commented example implementation [can be found here](/Whistleblower/blob/master/src/types/config.ts).
+Whistleblower requires minimal configuration. However, if you need to customize its behavior, rename [example.config.ts](/Whistleblower/blob/master/example.config.ts) file to `config.ts` and modify as needed. A heavily commented example implementation [can be found here](/Whistleblower/blob/master/src/types/config.ts).
+
 
 ## Installation
 
 1. Clone this repository
-2. Install dependencies via: 
-- npm: `npm install`
+2. Install dependencies via:
 - yarn: `yarn`
-
+- npm: `npm install`
 
 ## Running
- 
+
 ![](https://github.com/Bundlr-Network/Whistleblower/blob/master/assets/whistleblower-running.png?raw=true)
 
 You can run Whistleblower using either yarn or npm. Start by initializing it with the address(es) of the nodes you want to monitor, then start the application.
 
-### Via yarn
-
 ```console
-yarn wb-init --nodes https://node1.bundlr.network https://node2.bundlr.network 
-yarn restart 
+yarn whistleblower init --nodes https://node1.bundlr.network https://node2.bundlr.network
 ```
 
-### Via npm
 
-```console
-npm run init-wb -- -n https://node1.bundlr.network https://node2.bundlr.network
-npm run restart 
-```
+
