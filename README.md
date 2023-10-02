@@ -3,21 +3,24 @@
 
 ![](https://github.com/Bundlr-Network/Whistleblower/blob/master/assets/irys-whistleblower.png?raw=true)
 
-Whistleblower is a lightweight tool for monitoring transactions uploaded to Irys and verifying their finalization on Arweave. It cross-references uploaded transactions with finalized ones and triggers an alert if a transaction misses its finalization deadline. Whistleblower can be easily deployed on any computer with a single command argument, making transaction monitoring both simple and accessible.
+Whistleblower is a lightweight tool for monitoring [transactions uploaded to Irys](https://docs.irys.xyz/learn/transaction-lifecycle) and verifying they are finalized on Arweave and seeded to miners. 
 
+Whistleblower can be easily deployed on any computer with a single command, making transaction monitoring both simple and accessible.
 
 With Whistleblower, you can ensure that:
 
 - Transactions are finalized on Arweave by their deadline height (the block number by which the transaction must be finalized on Arweave).
 - Transactions have valid formats and signatures.
-- Bundles have valid formats and signatures.
+- [Bundles](https://docs.irys.xyz/learn/bundles) have valid formats and signatures.
+- Data uploaded is seeded to Arweave miners.
 
 
 ## Whistleblower step-by-step
 
 ![](https://github.com/Bundlr-Network/Whistleblower/blob/master/assets/irys-whistleblower-steps.png?raw=true)
 
-Start by launching Whistleblower via your CLI and select the nodes you want to monitor.
+Start by launching Whistleblower via your CLI and select the [nodes](https://docs.irys.xyz/overview/nodes) you want to monitor.
+
 Whistleblower then:
 1. Initializes WebSocket connections to each of the selected nodes for real-time monitoring.
 2. Connects to an Arweave gateway to retrieve all bundles associated with the nodes being tracked.
@@ -25,9 +28,8 @@ Whistleblower then:
    1. Traverses through each transaction within a bundle, ensuring that it can both download and cryptographically verify each one.
 4. Triggers an alert if a transaction cannot be downloaded or verified prior to reaching its deadline height.
 
-
 ## Whistleblower failure modes
-Whistleblower cares that a transaction is in a bundle and that bundle is onchain. 
+Whistleblower cares that a transaction is in a bundle, that bundle is onchain and the data can be downloaded from miners.
 As it tracks the status of each transaction, an alert will be triggered if:
 
 1. Whistleblower can't download and verify a transaction by its deadline height.
@@ -39,6 +41,7 @@ As it tracks the status of each transaction, an alert will be triggered if:
    1. Because it hasn't been verified by its deadline height.
    2. Because it's orphaned, Whistleblower is tracking it, but it hasn't showed in any posted bundles. 
 5. A transaction is included in a bundle tagged as invalid.
+6. The data can not be downloaded
 
 ## Alerts
 
