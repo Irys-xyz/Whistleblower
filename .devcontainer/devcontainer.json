@@ -11,6 +11,13 @@
 			"version": "latest",
 			"dockerDashComposeVersion": "none"
 		}
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"rvest.vs-code-prettier-eslint"
+			]
+		}
 	}
 
 	// Features to add to the dev container. More info: https://containers.dev/features.

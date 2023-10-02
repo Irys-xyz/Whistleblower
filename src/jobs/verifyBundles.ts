@@ -1,9 +1,6 @@
 import database from "@/db/sqlite";
 import { type Bundles } from "@/types/db";
 import logger from "@logger";
-// import { verifyBundle } from "@/worker/bundleVerifier";
-// import PromisePool from "@supercharge/promise-pool/dist";
-// import { BUNDLE_VERIFY_CONCURRENCY } from "@utils/env";
 import { getNetworkHeight } from "@utils/arweave";
 import { bundleVerifier } from "@/worker/pool";
 
@@ -13,15 +10,20 @@ export async function verifyBundles(): Promise<void> {
     .select("tx_id")
     .whereNull("is_valid")
     .andWhere("block", "<=", (await getNetworkHeight()) - 50)
+    .limit(250)
     .then((v) => v.map((x) => x.tx_id));
+
+  // chunk processing to 250 per batch - this is done so older bundles that need retries are able to
+  // get them when backlog is high.
 
   logger.verbose(`[verifyBundles] verifying ${bundlesToProcess.length} bundles`);
   if (bundlesToProcess.length >= 100)
-    logger.warn(`[verifyBundles] high waiting bundles count (${bundlesToProcess.length})`);
-  // await new PromisePool(bundlesToProcess)
-  //   .withConcurrency(BUNDLE_VERIFY_CONCURRENCY)
-  //   .process((bundleId) => verifyBundle(bundleId));
-  // const donePromise = new Promise((r) => bundleVerifier.on("drain", r));
+    logger.warn(
+      `[verifyBundles] high waiting bundles count (${
+        bundlesToProcess.length === 250 ? "250+" : bundlesToProcess.length
+      })`,
+    );
+
   const processing = bundlesToProcess.map((b) => bundleVerifier.run(b));
 
   await Promise.allSettled(processing);

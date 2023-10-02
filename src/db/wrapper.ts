@@ -7,7 +7,7 @@ import { type Knex } from "knex";
 export function wrapKnex(knex: Knex): void {
   const queries = new Map<
     string,
-    { sql: string; start: number; cleanup: NodeJS.Timer; queryContext?: { timeout?: number } }
+    { sql: string; start: number; cleanup: NodeJS.Timer; queryContext?: { timeout?: number; name?: string } }
   >();
   //   const originalRunner = knex.client.runner;
   //   const x = inspect(originalRunner);
@@ -40,7 +40,8 @@ export function wrapKnex(knex: Knex): void {
     const duration = performance.now() - q.start;
     const alertTimeout = q.queryContext?.timeout ?? 2_000;
     const durationStr = duration.toFixed(3);
-    if (duration > alertTimeout) logger.warn(`query ${q.sql} took too long! (${durationStr} > ${alertTimeout})`);
-    if (DEBUG) logger.debug(`query ${query.sql} took ${durationStr}ms`);
+    const str = q?.queryContext?.name ?? q.sql;
+    if (duration > alertTimeout) logger.warn(`query ${str} took too long! (${durationStr} > ${alertTimeout})`);
+    if (DEBUG) logger.debug(`query ${str} took ${durationStr}ms`);
   });
 }

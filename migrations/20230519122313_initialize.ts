@@ -23,6 +23,7 @@ export async function up(knex: Knex): Promise<void> {
       table.boolean("nested"); // if this is a nested bundle (not really needed for now?)
       table.timestamp("date_created").notNullable().index();
       table.string("from_node").references("url").inTable("bundlers").onUpdate("cascade"); // url of the bundler node this bundle came from
+      table.integer("verify_attempts").defaultTo(0).notNullable();
     })
     .createTable("peers", (table) => {
       table.string("url").primary().unique(); // full URL (new URL(...).toString())

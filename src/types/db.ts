@@ -17,6 +17,7 @@ export type Bundles = {
   date_created: Date | number | undefined;
   nested: boolean;
   from_node: string | undefined;
+  verify_attempts: number;
 };
 
 export type Peers = {

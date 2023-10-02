@@ -1,4 +1,12 @@
+import { type PathLike, promises } from "fs";
+
 export const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
+export const checkPath = async (path: PathLike): Promise<boolean> => {
+  return promises
+    .stat(path)
+    .then((_) => true)
+    .catch((_) => false);
+};
 
 /**
  * Generates a list of dates from `start` to `end` inclusive
@@ -21,7 +29,9 @@ export function generateDateRange(start: Date, end: Date, intervalMs = 24 * 60 *
 export function fmtError(e: Error): string {
   return `${e.name}: ${e.message + " " + e.stack}`;
 }
-
+export function fmtErrorConcise(e: any): string | undefined {
+  return e?.stack ?? e?.message ?? e.toString();
+}
 export function between(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min) + min);
 }

@@ -3,6 +3,7 @@ import database from "@/db/sqlite";
 import logger from "@logger";
 import { getNetworkHeight } from "@utils/arweave";
 import { alert } from "@utils/alert";
+import { TransactionAlertCodes } from "@/types/alert";
 
 export async function processInvalidTxs(): Promise<any> {
   const height = await getNetworkHeight();
@@ -14,7 +15,7 @@ export async function processInvalidTxs(): Promise<any> {
     .then((r) => r?.min ?? 0);
 
   // these txs have passed their deadline height without being validated
-  // group by bundled_in
+  // "group by" bundled_in
   const invalidHeightTxs = await database<Transactions>("transactions")
     .select("*")
     .where("is_valid", "<>", true)
@@ -28,12 +29,26 @@ export async function processInvalidTxs(): Promise<any> {
 }
 
 export async function handleInvalidTx(tx: Transactions): Promise<void> {
+  if (tx.is_valid === false) {
+    // this tx at one point failed verification, and is still invalid
+    // now we alert
+    await alert({
+      type: "transaction",
+      code: TransactionAlertCodes.INVALID,
+      reason: `Transaction ${tx.tx_id} is marked as invalid and has exceeded it's deadline height`,
+      info: {
+        id: tx.tx_id,
+        date_verified: tx.date_verified,
+      },
+    });
+  }
   // can't find parent bundle - orphan - very bad, potentially not on chain at all
   if (!tx.bundled_in) {
     // use alert
     await alert({
       type: "transaction",
       reason: "orphan transaction - unable to locate parent bundle",
+      code: TransactionAlertCodes.UNABLE_TO_LOCATE_PARENT_BUNDLE,
       info: { id: tx.tx_id },
     });
     await database<Transactions>("transactions")
@@ -45,6 +60,7 @@ export async function handleInvalidTx(tx: Transactions): Promise<void> {
   // if (!bundleMeta || tx.bundled_in !== bundleMeta.tx_id) {
   const bundleMeta = await database<Bundles>("bundles").select("*").where("tx_id", "=", tx.bundled_in).first();
 
+  // this shouldn't happen in normal operation
   if (!bundleMeta) {
     logger.error(`[verifyTx:bundleResolver] Unable to find bundle ${tx.bundled_in}`);
     await database<Transactions>("transactions")
@@ -53,6 +69,7 @@ export async function handleInvalidTx(tx: Transactions): Promise<void> {
     await alert({
       type: "transaction",
       reason: "unable to locate parent bundle, unable to verify item",
+      code: TransactionAlertCodes.UNABLE_TO_LOCATE_PARENT_BUNDLE,
       info: { id: tx.tx_id, ...tx, bundle: bundleMeta },
     });
     return;
@@ -61,6 +78,7 @@ export async function handleInvalidTx(tx: Transactions): Promise<void> {
     // hasn't been verified yet, wait.
     return;
   }
+
   // if parent bundle is invalid, explains the lack of tx validity
   // is_valid is actually an int...
   // eslint-disable-next-line eqeqeq
@@ -72,6 +90,7 @@ export async function handleInvalidTx(tx: Transactions): Promise<void> {
     await alert({
       type: "transaction",
       reason: "parent bundle invalid, unable to verify item",
+      code: TransactionAlertCodes.INVALID_PARENT_BUNDLE,
       info: { id: tx.tx_id, ...tx, bundle: bundleMeta },
     });
     return;

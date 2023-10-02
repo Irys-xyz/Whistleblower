@@ -20,12 +20,12 @@ export const DEBUG = !!(process.env.debug ?? config?.system?.debug);
 if (DEBUG) {
   // double stacktrace limit
   Error.stackTraceLimit = 20;
-  // potentially dangerous hack to always include stack traces
-  Error.prototype.toString = function (): string {
-    const name = this.name ?? "Error";
-    const msg = (this.message ?? "") + "\n" + this.stack;
-    return `${name}: ${msg}`;
-  };
+  // // potentially dangerous hack to always include stack traces
+  // Error.prototype.toString = function (): string {
+  //   const name = this.name ?? "Error";
+  //   const msg = this.message && !this.stack.includes(this.message) ? this.message + "\n" + this.stack : this.stack;
+  //   return `${name}: ${msg}`;
+  // };
 }
 
 export const ENABLE_TPS_COUNTER = config?.system?.enableTpsCounter ?? false;
@@ -63,14 +63,25 @@ export const GATEWAY_CONFIG: ApiConfig = {
 export const TX_DEADLINE_OFFSET = config?.system?.txDeadlineOffset ?? 1000;
 export const MAX_PEER_DEPTH = config?.system?.maxPeerDepth ?? 2;
 export const START_HEIGHT = config?.arweave?.startHeight;
-export const MAX_TX_AGE = config?.system?.maxTxAgeMs ?? ONE_DAY;
-export const MAX_BUNDLE_AGE = config?.system?.maxBundleAgeMs ?? ONE_WEEK;
+export const MAX_TX_AGE = config?.database?.maxTxAgeMs ?? ONE_DAY;
+export const MAX_BUNDLE_AGE = config?.database?.maxBundleAgeMs ?? ONE_WEEK;
 export const ORPHAN_AGE_THRESHOLD = config?.system?.orphanTxAgeThresholdMs ?? 20 * 2 * 60 * 1000; // 20 blocks (ish)
 export const ORPHAN_RESOLVE_CONCURRENCY =
-  (config?.system?.orphanResolveConcurrency ?? 10) < 1 ? 10 : config?.system?.orphanResolveConcurrency ?? 10;
-export const PRESERVE_INVALID = config?.system?.preserveInvalid ?? false;
+  (config?.verification?.orphanResolveConcurrency ?? 10) < 1
+    ? 10
+    : config?.verification?.orphanResolveConcurrency ?? 10;
+export const PRESERVE_INVALID = config?.database?.preserveInvalid ?? false;
 export const BUNDLE_VERIFY_CONCURRENCY =
-  (config?.system?.bundleVerifyConcurrency ?? 10) < 1 ? 10 : config?.system?.bundleVerifyConcurrency ?? 10;
+  (config?.verification?.bundleVerifyConcurrency ?? 10) < 1 ? 10 : config?.verification?.bundleVerifyConcurrency ?? 10;
 
-export const DEFAULT_AXIOS_CONFIG = config?.request?.defaultAxiosConfig ?? { timeout: 20_000 };
+export const DEFAULT_AXIOS_CONFIG = config?.request?.defaultAxiosConfig ?? {
+  validateStatus: (status): boolean => status < 407,
+  timeout: 20_000,
+  retry: {
+    shouldBail: (response): boolean => {
+      return response?.status === 404;
+    },
+  },
+};
 export const DEFAULT_REQUEST_RETRY_CONFIG = config?.request?.defaultRetryConfig ?? {};
+export const MAX_BUNDLE_VERIFY_ATTEMPTS = config?.verification?.maxBundleVerifyAttempts ?? 3;

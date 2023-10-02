@@ -1,6 +1,10 @@
 import { type retryRequest } from "@utils/axios";
 import { type Options } from "async-retry";
+
 export type Config = {
+  /**
+   * Database configuration
+   */
   database?: {
     /**
      * the directory to store the database file (`database.file`), WAL and SHM
@@ -12,7 +16,26 @@ export type Config = {
      * @default "db.sqlite"
      */
     file?: string;
+    /**
+     * Number of ms to keep valid txs in DB
+     * @default 7 * 24 * 60 * 60 * 1000 (one week)
+     */
+    maxTxAgeMs?: number;
+    /**
+     * Number of ms to keep valid bundles in DB
+     * @default 7 * 24 * 60 * 60 * 1000 (one week)
+     */
+    maxBundleAgeMs?: number;
+    /**
+     * Whether to indefinitely retain invalid txs & bundles in the DB.
+     * @default true
+     */
+    preserveInvalid?: boolean;
   };
+
+  /**
+   * Arweave network configuration
+   */
   arweave?: {
     /**
      * The Arweave gateway to use
@@ -25,17 +48,54 @@ export type Config = {
     startHeight?: number;
   };
 
+  /**
+   * HTTP request configuration
+   */
   request?: {
     defaultAxiosConfig?: Parameters<typeof retryRequest>[1];
     defaultRetryConfig?: Options;
     defaultDownloadTxConcurrency?: number;
   };
+
+  /**
+   * Verification system configuration
+   */
+  verification?: {
+    /**
+     * Maximum number of attempts to try to verify a bundle before marking it as invalid
+     * @default 3
+     */
+    maxBundleVerifyAttempts?: number;
+    /**
+     * Number of concurrent orphan transactions to resolve
+     * Increasing this might lead to arweave gateway rate limiting
+     * @default 5
+     */
+    orphanResolveConcurrency?: number;
+    /**
+     * Number of concurrent validation jobs to perform.
+     * Increasing this increases the maximum CPU, network, and memory usage of WB
+     * @default 10
+     */
+    bundleVerifyConcurrency?: number;
+
+    /**
+     * Number of tasks to run per thread, by default the max number
+     * of threads is set to bundleVerifyConcurrency, so this value will multiply the throughput
+     */
+    bundleVerifyTasksPerThread?: number;
+  };
+
   // bundlers?: Record<
   //   UrlString,
   //   {
   //     checkExpression?: string;
   //   }
   // >;
+
+  /**
+   * General system configuration
+   */
   system?: {
     /**
      * Logging level - debug logs everything, error only logs errors
@@ -55,16 +115,6 @@ export type Config = {
      */
     debug?: boolean;
     /**
-     * Number of ms to keep valid txs in DB
-     * @default 7 * 24 * 60 * 60 * 1000 (one week)
-     */
-    maxTxAgeMs?: number;
-    /**
-     * Number of ms to keep valid bundles in DB
-     * @default 7 * 24 * 60 * 60 * 1000 (one week)
-     */
-    maxBundleAgeMs?: number;
-    /**
      * Enable a TPS counter for all tracked nodes
      * @default false
      */
@@ -75,32 +125,11 @@ export type Config = {
      * @default 20 * 2 * 60 * 1000 (20 blocks)
      */
     orphanTxAgeThresholdMs?: number;
-    /**
-     * Whether to indefinitely retain invalid txs & bundles in the DB.
-     * @default true
-     */
-    preserveInvalid?: boolean;
-    /**
-     * Number of concurrent validation jobs to perform.
-     * Increasing this increases the maximum CPU, network, and memory usage of WB
-     * @default 10
-     */
-    bundleVerifyConcurrency?: number;
-
-    /**
-     * Number of tasks to run per thread, by default the max number
-     * of threads is set to bundleVerifyConcurrency, so this value will multiply the throughput
-     */
-    bundleVerifyTasksPerThread?: number;
-
-    /**
-     * Number of concurrent orphan transactions to resolve
-     * Increasing this might lead to arweave gateway rate limiting
-     * @default 5
-     */
-    orphanResolveConcurrency?: number;
   };
 
+  /**
+   * Alert configuration
+   */
   alert?: {
     /**
      * Path to the file to import for the alert function

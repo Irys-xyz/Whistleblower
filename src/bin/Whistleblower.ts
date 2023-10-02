@@ -18,10 +18,11 @@ process.on("unhandledRejection", (reason, promise) => {
   sleep(2_000).then((_) => process.exit(1));
 });
 
-registerHandler("crash.log", function (signal, address, stack) {
-  // Do what you want with the signal, address, or stack (array)
-  // This callback will execute before the signal is forwarded on.
-  console.error(`SEGFAULT ${signal} ${address} ${stack}`);
+registerHandler("crash.log");
+
+process.on("SIGINT", () => {
+  // @ts-expect-error signal
+  process.emit("beforeExit", "SIGINT"), sleep(20_000).then((_) => process.exit(0));
 });
 
 (async function (): Promise<void> {
