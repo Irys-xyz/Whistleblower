@@ -5,7 +5,7 @@
 
 Whistleblower is a lightweight tool for monitoring [transactions uploaded to Irys](https://docs.irys.xyz/learn/transaction-lifecycle) and verifying they are finalized on Arweave and seeded to miners. 
 
-Whistleblower can be easily deployed on any computer with a single command, making transaction monitoring both simple and accessible.
+Whistleblower can be easily deployed on most computers, making transaction monitoring both simple and accessible.
 
 With Whistleblower, you can ensure that:
 
@@ -19,9 +19,7 @@ With Whistleblower, you can ensure that:
 
 ![](https://github.com/Bundlr-Network/Whistleblower/blob/master/assets/irys-whistleblower-steps.png?raw=true)
 
-Start by launching Whistleblower via your CLI and select the [nodes](https://docs.irys.xyz/overview/nodes) you want to monitor.
-
-Whistleblower then:
+Whistleblower connects to [Irys](https://docs.irys.xyz/overview/nodes) and then:
 1. Initializes WebSocket connections to each of the selected nodes for real-time monitoring.
 2. Connects to an Arweave gateway to retrieve all bundles associated with the nodes being tracked.
 3. Connects to Arweave miners, making sure it can download the entire bundle. 
@@ -59,11 +57,21 @@ Whistleblower requires minimal configuration. If you need to customize its behav
 
 ## Installation
 
-1. Clone this repository
-2. Install dependencies via: 
-- npm: `npm install`
-- yarn: `yarn`
+Clone this repository and then install Whistleblower via: 
 
+### Via yarn
+
+```console
+yarn
+yarn build
+```
+
+### Via npm
+
+```console
+npm install
+yarn build
+```
 
 ## Running
  
@@ -74,13 +82,14 @@ You can run Whistleblower using either yarn or npm. Start by initializing it wit
 ### Via yarn
 
 ```console
-yarn wb-init --nodes https://node1.irys.xyz https://node2.irys.xyz 
-yarn restart 
+yarn whistleblower init --nodes https://node1.irys.xyz https://node2.irys.xyz
+yarn start 
 ```
 
 ### Via npm
 
 ```console
-npm run init-wb -- -n https://node1.irys.xyz https://node2.irys.xyz
-npm run restart 
+TODO
+npm run whistleblower init --nodes https://node1.irys.xyz https://node2.irys.xyz
+npm run start 
 ```
