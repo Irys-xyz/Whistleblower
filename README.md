@@ -57,7 +57,7 @@ export default async function alert(alert: Alert): Promise<void> {
 
 ## Configuration
 
-Whistleblower no configuration by default. If you need to customize its behavior, rename [example.config.ts](./example.config.ts) file to `config.ts` and modify as needed. A heavily commented example implementation [can be found here](./src/types/config.ts).
+Whistleblower requires no configuration by default. If you need to customize its behavior, rename [example.config.ts](./example.config.ts) file to `config.ts` and modify as needed. A heavily commented example implementation [can be found here](./src/types/config.ts).
 
 ## Installation
 
