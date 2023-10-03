@@ -32,16 +32,14 @@ Whistleblower connects to [Irys](https://docs.irys.xyz/overview/nodes) and then:
 
 ## Whistleblower failure modes
 Whistleblower cares that a transaction is in a bundle, that bundle is onchain and the data can be downloaded from miners.
-As it tracks the status of each transaction, an alert will be triggered if:
 
-1. A bundle is found to be invalid:
-   1. Because it can't be cryptographically verified.
-   2. Because Whistleblower can't download the full bundle.
-2. A transaction is invalid:
-   1. Because it hasn't been verified by its deadline height.
-   2. Because it's orphaned, i.e. Whistleblower is tracking the transaction, but it hasn't showed in any posted bundles.
-3. A transaction is included in a bundle tagged as invalid.
-4. The data can not be downloaded.
+As it tracks the status of each transaction, an alert will be triggered if a transaction is invalid. 
+
+A transaction is invalid iff.:
+- The transaction isn't included in a bundle by the deadline height.
+- The bundle the transaction resides in isn't seeded to >=5 miners by the deadline height.
+- The bundle the transaction resides in have <50 confirmations on Arweave.
+
 
 ## Alerts
 
