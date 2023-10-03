@@ -5,15 +5,17 @@ import { fmtErrorConcise, sleep } from "@utils";
 import logger from "@logger";
 import { downloadTx } from "@utils/txDownloader";
 import { Readable } from "stream";
-import processStream, { ProcessStreamFailure, ProcessStreamReturn, type ProcessedItem } from "@utils/processStream";
-import { alert } from "@utils/alert";
+import processStream, {
+  ProcessStreamFailure,
+  type ProcessStreamReturn,
+  type ProcessedItem,
+} from "@utils/processStream";
 import { fallbackPeerRequest } from "@utils/peers";
 import BigNumber from "bignumber.js";
 import axios from "axios";
 import { inspect } from "util";
 import { MAX_BUNDLE_VERIFY_ATTEMPTS } from "@utils/env";
 import piscina from "piscina";
-import { BundleAlertCodes } from "@/types/alert";
 
 // only add handlers if we're in a worker thread
 if (piscina.isWorkerThread) {
