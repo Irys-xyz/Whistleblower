@@ -48,7 +48,6 @@ export async function* downloadTx(
         processedBytes += b.length;
         return b;
       } catch (e) {
-        console.error(e);
         return e as Error;
       }
     };
