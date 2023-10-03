@@ -7,7 +7,7 @@ import { type Knex } from "knex";
 export function wrapKnex(knex: Knex): void {
   const queries = new Map<
     string,
-    { sql: string; start: number; cleanup: NodeJS.Timer; queryContext?: { timeout?: number; name?: string } }
+    { sql: string; start: number; cleanup: NodeJS.Timeout; queryContext?: { timeout?: number; name?: string } }
   >();
   //   const originalRunner = knex.client.runner;
   //   const x = inspect(originalRunner);
