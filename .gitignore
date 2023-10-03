@@ -11,3 +11,4 @@ db/*
 scratch.md
 ecosystem.config.js
 yarn-error.log
+package-lock.json
