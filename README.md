@@ -1,9 +1,13 @@
 # Whistleblower
 
 
-![](https://github.com/Bundlr-Network/Whistleblower/blob/master/assets/irys-whistleblower.png?raw=true)
+![](./assets/irys-whistleblower.png?raw=true)
 
 Whistleblower is a lightweight tool for monitoring [transactions uploaded to Irys](https://docs.irys.xyz/learn/transaction-lifecycle) and verifying they are finalized on Arweave and seeded to miners. 
+
+> A transaction is "finalized" once 50 Arweave block confirmations have passed. With a block time of 2 minutes, it takes roughly 100 minutes before a transaction can be considered final.
+
+> A transaction is "seeded" when the data can be fully retrieved.
 
 Whistleblower can be easily deployed on most computers, making transaction monitoring both simple and accessible.
 
@@ -17,7 +21,7 @@ With Whistleblower, you can ensure that:
 
 ## Whistleblower step-by-step
 
-![](https://github.com/Bundlr-Network/Whistleblower/blob/master/assets/irys-whistleblower-steps.png?raw=true)
+![](./assets/irys-whistleblower-steps.png?raw=true)
 
 Whistleblower connects to [Irys](https://docs.irys.xyz/overview/nodes) and then:
 1. Initializes WebSocket connections to each of the selected nodes for real-time monitoring.
@@ -43,7 +47,7 @@ As it tracks the status of each transaction, an alert will be triggered if:
 
 ## Alerts
 
-By default, Whistleblower sends alerts via the CLI if a transaction isn't finalized by its deadline height. To create a custom alert, write a class implementing [this interface](/Whistleblower/blob/master/src/utils/alert.ts), and include your custom behavior in the alert function shown below. There's also [an example implementation](/Whistleblower/blob/master/alert.ts) demonstrating how to set up an alert using [PagerDuty](https://www.pagerduty.com/).
+By default, Whistleblower sends alerts via the CLI if a transaction isn't finalized by its deadline height. To create a custom alert, write a class implementing [this interface](./src/utils/alert.ts), and include your custom behavior in the alert function shown below. There's also [an example implementation](./master/alert.ts) demonstrating how to set up an alert using [PagerDuty](https://www.pagerduty.com/).
 
 ```js
 export default async function alert(alert: Alert): Promise<void> {
@@ -53,7 +57,7 @@ export default async function alert(alert: Alert): Promise<void> {
 
 ## Configuration
 
-Whistleblower requires minimal configuration. If you need to customize its behavior, rename [example.config.ts](/Whistleblower/blob/master/example.config.ts) file to `config.ts` and modify as needed. A heavily commented example implementation [can be found here](/Whistleblower/blob/master/src/types/config.ts).
+Whistleblower no configuration by default. If you need to customize its behavior, rename [example.config.ts](./example.config.ts) file to `config.ts` and modify as needed. A heavily commented example implementation [can be found here](./src/types/config.ts).
 
 ## Installation
 
@@ -70,12 +74,12 @@ yarn build
 
 ```console
 npm install
-yarn build
+yarn run build
 ```
 
 ## Running
  
-![](https://github.com/Bundlr-Network/Whistleblower/blob/master/assets/whistleblower-running.png?raw=true)
+![](./assets/whistleblower-running.png?raw=true)
 
 You can run Whistleblower using either yarn or npm. Start by initializing it with the address(es) of the nodes you want to monitor, then start the application.
 
@@ -89,7 +93,6 @@ yarn start
 ### Via npm
 
 ```console
-TODO
 npm run whistleblower init --nodes https://node1.irys.xyz https://node2.irys.xyz
 npm run start 
 ```
