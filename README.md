@@ -3,7 +3,7 @@
 
 ![](./assets/irys-whistleblower.png?raw=true)
 
-Whistleblower is a lightweight tool for monitoring [transactions uploaded to Irys](https://docs.irys.xyz/learn/transaction-lifecycle) and verifying they are finalized on Arweave and seeded to miners. 
+Whistleblower is a lightweight tool for monitoring [transactions uploaded to Irys](https://docs.irys.xyz/learn/transaction-lifecycle), verifying they are finalized on Arweave and seeded to miners. 
 
 > A transaction is "finalized" once >= 50 Arweave block confirmations have passed. With a block time of ~2 minutes, it takes ~100 minutes before a transaction can be considered final.
 
@@ -43,11 +43,11 @@ As it tracks the status of each transaction, an alert will be triggered if:
    1. Because it hasn't been verified by its deadline height.
    2. Because it's orphaned, Whistleblower is tracking it, but it hasn't showed in any posted bundles. 
 5. A transaction is included in a bundle tagged as invalid.
-6. The data can not be downloaded
+6. The data can not be downloaded.
 
 ## Alerts
 
-By default, Whistleblower sends alerts via the CLI if a transaction isn't finalized by its deadline height. To create a custom alert, write a class implementing [this interface](./src/utils/alert.ts), and include your custom behavior in the alert function shown below. There's also [an example implementation](./master/alert.ts) demonstrating how to set up an alert using [PagerDuty](https://www.pagerduty.com/).
+By default, Whistleblower sends alerts via the CLI if a transaction isn't finalized by its deadline height. To create a custom alert, write a class implementing [this interface](./src/utils/alert.ts), and include your custom behavior in the alert function shown below. There's also [an example implementation](./alert.ts) demonstrating how to set up an alert using [PagerDuty](https://www.pagerduty.com/).
 
 ```js
 export default async function alert(alert: Alert): Promise<void> {
