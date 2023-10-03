@@ -175,18 +175,19 @@ export async function verifyBundle(bundleId: string): Promise<void> {
       // then this bundle is invalid
       await database<Bundles>("bundles").update({ is_valid: false }).where("tx_id", "=", bundleId);
 
-      await alert({
-        type: "bundle",
-        reason: `Bundle failed to verify without errors after ${attempts} attempts.`,
-        code: BundleAlertCodes.VERIFY_ATTEMPTS_EXHAUSTED,
-        info: {
-          id: bundleId,
-          errors: {
-            miner: minerAttempt,
-            gateway: gatewayAttempt,
-          },
-        },
-      });
+      // await alert({
+      //   type: "bundle",
+      //   reason: `Bundle failed to verify without errors after ${attempts} attempts.`,
+      //   code: BundleAlertCodes.VERIFY_ATTEMPTS_EXHAUSTED,
+      //   info: {
+      //     id: bundleId,
+      //     errors: {
+      //       miner: minerAttempt,
+      //       gateway: gatewayAttempt,
+      //     },
+      //   },
+      // });
+      logger.warn(`[verifyBundle:attempts] Bundle ${bundleId} has failed to verify after ${attempts} attempts.`);
       return;
     }
   } catch (e) {
