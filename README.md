@@ -34,16 +34,14 @@ Whistleblower connects to [Irys](https://docs.irys.xyz/overview/nodes) and then:
 Whistleblower cares that a transaction is in a bundle, that bundle is onchain and the data can be downloaded from miners.
 As it tracks the status of each transaction, an alert will be triggered if:
 
-1. Whistleblower can't download and verify a transaction by its deadline height.
-2. A transaction is invalid by its deadline height.
-3. A bundle is found to be invalid:
+1. A bundle is found to be invalid:
    1. Because it can't be cryptographically verified.
    2. Because Whistleblower can't download the full bundle.
-4. A transaction is invalid:
+2. A transaction is invalid:
    1. Because it hasn't been verified by its deadline height.
-   2. Because it's orphaned, Whistleblower is tracking it, but it hasn't showed in any posted bundles. 
-5. A transaction is included in a bundle tagged as invalid.
-6. The data can not be downloaded.
+   2. Because it's orphaned, i.e. Whistleblower is tracking the transaction, but it hasn't showed in any posted bundles.
+3. A transaction is included in a bundle tagged as invalid.
+4. The data can not be downloaded.
 
 ## Alerts
 
@@ -93,6 +91,6 @@ yarn start
 ### Via npm
 
 ```console
-npm run whistleblower init --nodes https://node1.irys.xyz https://node2.irys.xyz
+npm run whistleblower init  -- --nodes https://node1.irys.xyz https://node2.irys.xyz
 npm run start 
 ```
