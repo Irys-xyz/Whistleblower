@@ -35,7 +35,7 @@ Whistleblower cares that a transaction is in a bundle, that bundle is onchain an
 
 As it tracks the status of each transaction, an alert will be triggered if a transaction is invalid. 
 
-A transaction is invalid iff.:
+A transaction is invalid if and only if:
 - The transaction isn't included in a bundle by the deadline height.
 - The bundle the transaction resides in isn't seeded to >=5 miners by the deadline height.
 - The bundle the transaction resides in have <50 confirmations on Arweave.
