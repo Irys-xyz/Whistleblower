@@ -1,5 +1,5 @@
+import { type Alert } from "@/types/alert";
 import { retryRequest } from "@utils/axios";
-import { type Alert } from "./src/utils/alert";
 
 export default async function alert(alert: Alert): Promise<void> {
   // add your custom alert code here!
