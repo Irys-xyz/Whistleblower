@@ -11,8 +11,7 @@
       "outDir": "lib",
       "lib": [
         "esnext",
-        "ES2022",
-        "DOM"
+        "ES2022"
       ],
       "esModuleInterop": true,
       "alwaysStrict": true,

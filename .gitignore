@@ -8,3 +8,6 @@ db/*
 /config.ts
 .DS_Store
 /assets/.DS_Store
+scratch.md
+ecosystem.config.js
+yarn-error.log

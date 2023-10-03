@@ -4,9 +4,8 @@ import { type Config } from "@/types/config";
 import { type ApiConfig } from "arweave/node/lib/api";
 import { ONE_DAY, ONE_WEEK } from "./constants";
 
-export const IS_TS = !!process[Symbol.for("ts-node.register.instance")];
-
-// TODO: use Zod for validation
+// this is how we check if we're running in TS, as imports will differ if we are.
+export const IS_TS = !!process.env?.IS_TS || !!process[Symbol.for("ts-node.register.instance")];
 
 const configPath = resolve(process.cwd(), IS_TS ? "config.ts" : "./build/config.js");
 const configFileExists = statSync(configPath, { throwIfNoEntry: false });
@@ -29,15 +28,12 @@ if (DEBUG) {
 }
 
 export const ENABLE_TPS_COUNTER = config?.system?.enableTpsCounter ?? false;
-// logging
 export const LOG_LEVEL = DEBUG ? "debug" : process.env.LOG_LEVEL ?? config?.system?.logLevel ?? "info";
-// database options
 
 export const DATABASE_DIR = config?.database?.dir ?? "./db";
 
 // regenerate DB dir if it doesn't exist
 if (!statSync(DATABASE_DIR, { throwIfNoEntry: false })) {
-  // console.warn(`[env] database folder is missing, regenerating.`);
   mkdirSync(DATABASE_DIR, { recursive: true });
 }
 
@@ -63,14 +59,17 @@ export const GATEWAY_CONFIG: ApiConfig = {
 export const TX_DEADLINE_OFFSET = config?.system?.txDeadlineOffset ?? 1000;
 export const MAX_PEER_DEPTH = config?.system?.maxPeerDepth ?? 2;
 export const START_HEIGHT = config?.arweave?.startHeight;
-export const MAX_TX_AGE = config?.database?.maxTxAgeMs ?? ONE_DAY;
-export const MAX_BUNDLE_AGE = config?.database?.maxBundleAgeMs ?? ONE_WEEK;
+export const MAX_TX_AGE = config?.transactions?.maxTxAgeMs ?? ONE_DAY;
+export const MAX_BUNDLE_AGE = config?.bundles?.maxBundleAgeMs ?? ONE_WEEK;
 export const ORPHAN_AGE_THRESHOLD = config?.system?.orphanTxAgeThresholdMs ?? 20 * 2 * 60 * 1000; // 20 blocks (ish)
+export const BUNDLE_VERIFY_MIN_RETRY_INTERVAL = config?.bundles?.bundleVerifyMinInterval ?? 5 * 60 * 1000;
 export const ORPHAN_RESOLVE_CONCURRENCY =
   (config?.verification?.orphanResolveConcurrency ?? 10) < 1
     ? 10
     : config?.verification?.orphanResolveConcurrency ?? 10;
-export const PRESERVE_INVALID = config?.database?.preserveInvalid ?? false;
+export const PRESERVE_INVALID_TRANSACTIONS = config?.transactions?.preserveInvalid ?? false;
+export const PRESERVE_INVALID_BUNDLES = config?.bundles?.preserveInvalid ?? false;
+
 export const BUNDLE_VERIFY_CONCURRENCY =
   (config?.verification?.bundleVerifyConcurrency ?? 10) < 1 ? 10 : config?.verification?.bundleVerifyConcurrency ?? 10;
 
@@ -84,4 +83,4 @@ export const DEFAULT_AXIOS_CONFIG = config?.request?.defaultAxiosConfig ?? {
   },
 };
 export const DEFAULT_REQUEST_RETRY_CONFIG = config?.request?.defaultRetryConfig ?? {};
-export const MAX_BUNDLE_VERIFY_ATTEMPTS = config?.verification?.maxBundleVerifyAttempts ?? 3;
+export const MAX_BUNDLE_VERIFY_ATTEMPTS = config?.bundles?.maxBundleVerifyAttempts ?? 3;

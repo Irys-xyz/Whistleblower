@@ -40,6 +40,20 @@ program
     return;
   });
 
+program
+  .command("add-nodes <nodes...>")
+  .description("Add additional bundler nodes to be tracked by whistleblower")
+  .action(async (nodes) => {
+    console.log(`Adding ${nodes.length} bundler nodes...`);
+    for (const node of nodes) {
+      try {
+        await addBundler(new URL(node));
+      } catch (e) {
+        throw new Error(`Error adding node ${node} - ${e} `);
+      }
+    }
+  });
+
 const isScript = require.main === module;
 if (isScript) {
   (async function (): Promise<void> {

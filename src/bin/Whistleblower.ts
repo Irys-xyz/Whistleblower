@@ -21,8 +21,10 @@ process.on("unhandledRejection", (reason, promise) => {
 registerHandler("crash.log");
 
 process.on("SIGINT", () => {
+  logger.warn(`[Whistleblower:sigint] Received SIGINT, shutting down...`);
   // @ts-expect-error signal
-  process.emit("beforeExit", "SIGINT"), sleep(20_000).then((_) => process.exit(0));
+  process.emit("beforeExit", "SIGINT");
+  sleep(5_000).then((_) => process.exit(0));
 });
 
 (async function (): Promise<void> {

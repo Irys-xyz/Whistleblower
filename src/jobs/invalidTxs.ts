@@ -10,7 +10,7 @@ export async function processInvalidTxs(): Promise<any> {
   // get the oldest unindexed bundle, don't check anything after this.
   const bundleIndexedUntilHeight = await database<Bundles>("bundles")
     .min("block")
-    .whereNull("is_valid")
+    .where("date_last_verified", "<>", new Date(0))
     .first()
     .then((r) => r?.min ?? 0);
 
@@ -18,9 +18,9 @@ export async function processInvalidTxs(): Promise<any> {
   // "group by" bundled_in
   const invalidHeightTxs = await database<Transactions>("transactions")
     .select("*")
-    .where("is_valid", "<>", true)
+    .where("is_valid", "=", false)
     .andWhere("deadline_height", "<", Math.min(height, bundleIndexedUntilHeight))
-    .whereNull("date_verified")
+    .whereNull("date_last_verified")
     .orderBy("bundled_in");
 
   for (const tx of invalidHeightTxs) {
@@ -38,7 +38,7 @@ export async function handleInvalidTx(tx: Transactions): Promise<void> {
       reason: `Transaction ${tx.tx_id} is marked as invalid and has exceeded it's deadline height`,
       info: {
         id: tx.tx_id,
-        date_verified: tx.date_verified,
+        date_verified: tx.date_last_verified,
       },
     });
   }
@@ -52,7 +52,7 @@ export async function handleInvalidTx(tx: Transactions): Promise<void> {
       info: { id: tx.tx_id },
     });
     await database<Transactions>("transactions")
-      .update({ is_valid: false, date_verified: new Date() })
+      .update({ is_valid: false, date_last_verified: new Date() })
       .where("tx_id", "=", tx.tx_id);
     return;
   }
@@ -64,7 +64,7 @@ export async function handleInvalidTx(tx: Transactions): Promise<void> {
   if (!bundleMeta) {
     logger.error(`[verifyTx:bundleResolver] Unable to find bundle ${tx.bundled_in}`);
     await database<Transactions>("transactions")
-      .update({ is_valid: false, date_verified: new Date() })
+      .update({ is_valid: false, date_last_verified: new Date() })
       .where("tx_id", "=", tx.tx_id);
     await alert({
       type: "transaction",
@@ -74,7 +74,7 @@ export async function handleInvalidTx(tx: Transactions): Promise<void> {
     });
     return;
   }
-  if (!bundleMeta.date_verified) {
+  if (!bundleMeta.date_last_verified) {
     // hasn't been verified yet, wait.
     return;
   }
@@ -85,7 +85,7 @@ export async function handleInvalidTx(tx: Transactions): Promise<void> {
   if (bundleMeta.is_valid != true) {
     // not having validity means we've irrecoverably failed to parse/verify the bundle - this shouldn't happen, so we'll mark this as a failure/the tx isn't on chain.
     await database<Transactions>("transactions")
-      .update({ is_valid: false, date_verified: new Date() })
+      .update({ is_valid: false, date_last_verified: new Date() })
       .where("tx_id", "=", tx.tx_id);
     await alert({
       type: "transaction",

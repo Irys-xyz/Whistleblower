@@ -84,6 +84,7 @@ export async function getPostedBundles(
             from_node: url.toString(),
             date_created: new Date(),
             verify_attempts: 0,
+            date_last_verified: new Date(0),
           })),
           "tx_id",
         )

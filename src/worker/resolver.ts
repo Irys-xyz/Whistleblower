@@ -16,7 +16,7 @@ export async function resolveOrphanTxs(/* orphanAgeThreshold = ORPHAN_AGE_THRESH
   // get the oldest unindexed bundle, don't check anything after this.
   const bundleIndexedUntilHeight = await database<Bundles>("bundles")
     .min("block")
-    .whereNull("is_valid")
+    .where("date_last_verified", "<>", new Date(0))
     .first()
     .then((r) => r?.min ?? 0);
 

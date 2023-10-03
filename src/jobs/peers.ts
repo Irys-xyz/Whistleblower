@@ -5,7 +5,7 @@ import logger from "@logger";
 
 export async function crawlForPeers(maxDepth = MAX_PEER_DEPTH): Promise<void> {
   logger.info("[crawlForPeers] Crawling for peers");
-  await addPeers([new URL(GATEWAY_URL)]);
+  await addPeers([new URL(GATEWAY_URL.toString())]);
   await getPeers(GATEWAY_URL, maxDepth, 0);
   logger.info("[crawlForPeers] Finished crawling for peers");
 }

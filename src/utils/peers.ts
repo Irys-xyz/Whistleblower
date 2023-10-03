@@ -25,7 +25,7 @@ export async function fallbackPeerRequest<T = any, R = AxiosResponse<T>>(
   const peers =
     config?.peers?.shortlist ?? (await getPeers(config?.peers?.fallbackCount ?? 20, config?.peers?.random ?? true));
   // last resort fallback to GW
-  peers.push(new URL(GATEWAY_URL));
+  peers.push(new URL(GATEWAY_URL.toString()));
   let oRes;
   for (let i = 0; i < peers.length; i++) {
     // format is url, base
@@ -40,7 +40,7 @@ export async function fallbackPeerRequest<T = any, R = AxiosResponse<T>>(
       // we know previous peers didn't succeed, so we penalise them.
       const badPeers = peers.slice(0, i);
       // do not block for these updates
-      // note: depending on DB util, disable/reduce activity caused by this
+      // TODO: depending on DB util, disable/reduce activity caused by this
       if (config?.peers?.punish ?? true)
         penalisePeers(badPeers).catch((e) =>
           logger.warn(`[fallbackPeerRequest:penalise] Error penalising ${badPeers} - ${e}`),
@@ -99,7 +99,7 @@ export async function getPeers(count = 10, random = true): Promise<URL[]> {
   // select * from (select * from peers order by trust desc limit 10) union select * from (select * from peers order by RANDOM() limit 4);
   // `)
   // if (random)
-  let qRes = await database.raw(query);
+  let qRes = await database.raw(query).queryContext({ name: "getPeers" });
   if (random) qRes = shuffleArray(qRes);
   return qRes.map((p) => new URL(p.url));
 }

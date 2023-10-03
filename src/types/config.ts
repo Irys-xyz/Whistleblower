@@ -16,21 +16,6 @@ export type Config = {
      * @default "db.sqlite"
      */
     file?: string;
-    /**
-     * Number of ms to keep valid txs in DB
-     * @default 7 * 24 * 60 * 60 * 1000 (one week)
-     */
-    maxTxAgeMs?: number;
-    /**
-     * Number of ms to keep valid bundles in DB
-     * @default 7 * 24 * 60 * 60 * 1000 (one week)
-     */
-    maxBundleAgeMs?: number;
-    /**
-     * Whether to indefinitely retain invalid txs & bundles in the DB.
-     * @default true
-     */
-    preserveInvalid?: boolean;
   };
 
   /**
@@ -57,15 +42,46 @@ export type Config = {
     defaultDownloadTxConcurrency?: number;
   };
 
-  /**
-   * Verification system configuration
-   */
-  verification?: {
+  transactions?: {
+    /**
+     * Number of ms to keep valid txs in DB
+     * @default 7 * 24 * 60 * 60 * 1000 (one week)
+     */
+    maxTxAgeMs?: number;
+    /**
+     * Whether to indefinitely retain invalid txs in the DB.
+     * @default false
+     */
+    preserveInvalid?: boolean;
+  };
+
+  bundles?: {
     /**
      * Maximum number of attempts to try to verify a bundle before marking it as invalid
      * @default 3
      */
     maxBundleVerifyAttempts?: number;
+    /**
+     * Minimum time to wait (in milliseconds) between bundle verification attempts for a !valid bundle
+     * @default  5 * 60 * 1000  (5 minutes)
+     */
+    bundleVerifyMinInterval?: number;
+    /**
+     * Number of ms to keep valid bundles in DB
+     * @default 7 * 24 * 60 * 60 * 1000 (one week)
+     */
+    maxBundleAgeMs?: number;
+    /**
+     * Whether to indefinitely retain invalid bundles in the DB.
+     * @default false
+     */
+    preserveInvalid?: boolean;
+  };
+
+  /**
+   * Verification system configuration
+   */
+  verification?: {
     /**
      * Number of concurrent orphan transactions to resolve
      * Increasing this might lead to arweave gateway rate limiting

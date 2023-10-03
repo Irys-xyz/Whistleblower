@@ -11,15 +11,15 @@ export async function up(knex: Knex): Promise<void> {
       table.string("tx_id").primary().unique();
       table.boolean("is_valid").defaultTo(false); // if the tx is "valid" - deadline & cryptographically
       table.string("bundled_in").references("tx_id").inTable("bundles");
-      table.timestamp("date_verified"); // time this node decided on tx validity
+      table.timestamp("date_last_verified").defaultTo(0); // time this node decided on tx validity
       table.bigInteger("deadline_height"); // maximum network height for inclusion - actual inclusion height via bundles relation
       table.timestamp("date_created").notNullable();
     })
     .createTable("bundles", (table) => {
       table.string("tx_id").primary().unique();
       table.bigInteger("block").notNullable(); // height of the block the bundle is included in
-      table.boolean("is_valid").index();
-      table.timestamp("date_verified"); // time this node decided on bundle validity
+      table.boolean("is_valid").index().defaultTo(false);
+      table.timestamp("date_last_verified").defaultTo(0); // time this node decided on bundle validity
       table.boolean("nested"); // if this is a nested bundle (not really needed for now?)
       table.timestamp("date_created").notNullable().index();
       table.string("from_node").references("url").inTable("bundlers").onUpdate("cascade"); // url of the bundler node this bundle came from
