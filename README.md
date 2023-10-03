@@ -1,9 +1,11 @@
-
 # Whistleblower
 
-![](https://github.com/Bundlr-Network/Whistleblower/blob/master/assets/whistleblower.png?raw=true)
 
-Whistleblower is a lightweight tool for monitoring [transactions uploaded to Irys](https://docs.irys.xyz/learn/transaction-lifecycle) and verifying they are finalized on Arweave and seeded to miners. Whistleblower can be easily deployed on any computer with a single command, making transaction monitoring both simple and accessible.
+![](https://github.com/Bundlr-Network/Whistleblower/blob/master/assets/irys-whistleblower.png?raw=true)
+
+Whistleblower is a lightweight tool for monitoring [transactions uploaded to Irys](https://docs.irys.xyz/learn/transaction-lifecycle) and verifying they are finalized on Arweave and seeded to miners. 
+
+Whistleblower can be easily deployed on any computer with a single command, making transaction monitoring both simple and accessible.
 
 With Whistleblower, you can ensure that:
 
@@ -15,67 +17,70 @@ With Whistleblower, you can ensure that:
 
 ## Whistleblower step-by-step
 
+![](https://github.com/Bundlr-Network/Whistleblower/blob/master/assets/irys-whistleblower-steps.png?raw=true)
 
-![](https://github.com/Bundlr-Network/Whistleblower/blob/feat/misc/assets/whistleblower-steps.png?raw=true)
-
-
-Launch Whistleblower from your CLI and select the nodes you want to monitor.
+Start by launching Whistleblower via your CLI and select the [nodes](https://docs.irys.xyz/overview/nodes) you want to monitor.
 
 Whistleblower then:
 1. Initializes WebSocket connections to each of the selected nodes for real-time monitoring.
-2. Connects to an Arweave gateway to retrieve all [bundles](https://docs.irys.xyz/learn/bundles) associated with the nodes being tracked.
-3. Connects to Arweave miners, making sure it can download the entire [bundle](https://docs.irys.xyz/learn/bundles).
-4. Traverses through each transaction within a [bundle](https://docs.irys.xyz/learn/bundles), ensuring that it can both download and cryptographically verify each one
-5. Triggers an alert if a transaction cannot be downloaded or verified prior to reaching its deadline height.
-
+2. Connects to an Arweave gateway to retrieve all bundles associated with the nodes being tracked.
+3. Connects to Arweave miners, making sure it can download the entire bundle. 
+   1. Traverses through each transaction within a bundle, ensuring that it can both download and cryptographically verify each one.
+4. Triggers an alert if a transaction cannot be downloaded or verified prior to reaching its deadline height.
 
 ## Whistleblower failure modes
-Whistleblower cares that a transaction is in a [bundle](https://docs.irys.xyz/learn/bundles) and that bundle is onchain.
+Whistleblower cares that a transaction is in a bundle, that bundle is onchain and the data can be downloaded from miners.
 As it tracks the status of each transaction, an alert will be triggered if:
-
 
 1. Whistleblower can't download and verify a transaction by its deadline height.
 2. A transaction is invalid by its deadline height.
-3. A [bundle](https://docs.irys.xyz/learn/bundles) is found to be invalid:
-1. Because it can't be cryptographically verified.
-2. Because Whistleblower can't download the full [bundle](https://docs.irys.xyz/learn/bundles).
+3. A bundle is found to be invalid:
+   1. Because it can't be cryptographically verified.
+   2. Because Whistleblower can't download the full bundle.
 4. A transaction is invalid:
    1. Because it hasn't been verified by its deadline height.
-   2. Because it's orphaned, Whistleblower is tracking it, but it hasn't showed in any posted [bundle](https://docs.irys.xyz/learn/bundles).
-   3. A transaction is included in a [bundle](https://docs.irys.xyz/learn/bundles) tagged as invalid.
+   2. Because it's orphaned, Whistleblower is tracking it, but it hasn't showed in any posted bundles. 
+5. A transaction is included in a bundle tagged as invalid.
+6. The data can not be downloaded
 
 ## Alerts
 
 By default, Whistleblower sends alerts via the CLI if a transaction isn't finalized by its deadline height. To create a custom alert, write a class implementing [this interface](/Whistleblower/blob/master/src/utils/alert.ts), and include your custom behavior in the alert function shown below. There's also [an example implementation](/Whistleblower/blob/master/alert.ts) demonstrating how to set up an alert using [PagerDuty](https://www.pagerduty.com/).
 
-
 ```js
 export default async function alert(alert: Alert): Promise<void> {
-// Add your custom alert code here!
+   // Add your custom alert code here
 }
 ```
 
 ## Configuration
 
-Whistleblower requires minimal configuration. However, if you need to customize its behavior, rename [example.config.ts](/Whistleblower/blob/master/example.config.ts) file to `config.ts` and modify as needed. A heavily commented example implementation [can be found here](/Whistleblower/blob/master/src/types/config.ts).
-
+Whistleblower requires minimal configuration. If you need to customize its behavior, rename [example.config.ts](/Whistleblower/blob/master/example.config.ts) file to `config.ts` and modify as needed. A heavily commented example implementation [can be found here](/Whistleblower/blob/master/src/types/config.ts).
 
 ## Installation
 
 1. Clone this repository
-2. Install dependencies via:
-- yarn: `yarn`
+2. Install dependencies via: 
 - npm: `npm install`
+- yarn: `yarn`
+
 
 ## Running
-
+ 
 ![](https://github.com/Bundlr-Network/Whistleblower/blob/master/assets/whistleblower-running.png?raw=true)
 
 You can run Whistleblower using either yarn or npm. Start by initializing it with the address(es) of the nodes you want to monitor, then start the application.
 
+### Via yarn
+
 ```console
-yarn whistleblower init --nodes https://node1.bundlr.network https://node2.bundlr.network
+yarn wb-init --nodes https://node1.irys.xyz https://node2.irys.xyz 
+yarn restart 
 ```
 
+### Via npm
 
-
+```console
+npm run init-wb -- -n https://node1.irys.xyz https://node2.irys.xyz
+npm run restart 
+```
