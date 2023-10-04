@@ -83,11 +83,14 @@ export async function getPostedBundles(
             block: v.node.block.height,
             from_node: url.toString(),
             date_created: new Date(),
+            verify_attempts: 0,
+            date_last_verified: new Date(0),
           })),
           "tx_id",
         )
         .onConflict("tx_id")
-        .ignore();
+        .ignore()
+        .queryContext({ name: "bundleInsert" });
       newBundles += newBundlesCount.length;
       postedBundles += filteredTxs.length;
     }

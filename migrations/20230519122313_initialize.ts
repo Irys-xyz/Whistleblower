@@ -11,22 +11,23 @@ export async function up(knex: Knex): Promise<void> {
       table.string("tx_id").primary().unique();
       table.boolean("is_valid").defaultTo(false); // if the tx is "valid" - deadline & cryptographically
       table.string("bundled_in").references("tx_id").inTable("bundles");
-      table.timestamp("date_verified"); // time this node decided on tx validity
+      table.timestamp("date_last_verified").defaultTo(0); // time this node decided on tx validity
       table.bigInteger("deadline_height"); // maximum network height for inclusion - actual inclusion height via bundles relation
       table.timestamp("date_created").notNullable();
     })
     .createTable("bundles", (table) => {
       table.string("tx_id").primary().unique();
       table.bigInteger("block").notNullable(); // height of the block the bundle is included in
-      table.boolean("is_valid");
-      table.timestamp("date_verified"); // time this node decided on bundle validity
+      table.boolean("is_valid").index().defaultTo(false);
+      table.timestamp("date_last_verified").defaultTo(0); // time this node decided on bundle validity
       table.boolean("nested"); // if this is a nested bundle (not really needed for now?)
-      table.timestamp("date_created").notNullable();
+      table.timestamp("date_created").notNullable().index();
       table.string("from_node").references("url").inTable("bundlers").onUpdate("cascade"); // url of the bundler node this bundle came from
+      table.integer("verify_attempts").defaultTo(0).notNullable();
     })
     .createTable("peers", (table) => {
       table.string("url").primary().unique(); // full URL (new URL(...).toString())
-      table.specificType("trust", "double precision").notNullable();
+      table.specificType("trust", "double precision").notNullable().index();
       table.timestamp("date_created").notNullable();
       table.timestamp("last_praised");
     })
@@ -34,6 +35,10 @@ export async function up(knex: Knex): Promise<void> {
       table.string("url").primary().unique();
       table.string("address").notNullable();
     });
+  // .createTable("kv", (table) => {
+  //   table.string("key").primary();
+  //   table.string("value").notNullable();
+  // });
 }
 
 export async function down(knex: Knex): Promise<void> {
@@ -42,6 +47,7 @@ export async function down(knex: Knex): Promise<void> {
     .dropTableIfExists("bundles")
     .dropTableIfExists("peers")
     .dropTableIfExists("bundlers");
+  // .dropTableIfExists("kv");
 
   await knex.raw("VACUUM;");
 }

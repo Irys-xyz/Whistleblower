@@ -5,6 +5,7 @@ import { type AxiosResponse } from "axios";
 import { type Peers } from "@/types/db";
 import { asyncPool } from "./asyncPool";
 import { DEBUG, GATEWAY_URL } from "./env";
+import { shuffleArray } from "@utils";
 
 /**
  * Dispatches request with fallback to peers (in sequence of provided peer shortlist or peers trust)
@@ -17,24 +18,29 @@ import { DEBUG, GATEWAY_URL } from "./env";
 export async function fallbackPeerRequest<T = any, R = AxiosResponse<T>>(
   url: string,
   config?: Parameters<typeof retryRequest>[1] & {
-    peers?: { shortlist?: URL[]; fallbackCount?: number; praise?: boolean; punish?: boolean };
+    peers?: { shortlist?: URL[]; fallbackCount?: number; praise?: boolean; punish?: boolean; random?: boolean };
+    returnOnAllFailure?: boolean;
   },
 ): Promise<R> {
-  const peers = config?.peers?.shortlist ?? (await getPeers(config?.peers?.fallbackCount ?? 20));
+  const peers =
+    config?.peers?.shortlist ?? (await getPeers(config?.peers?.fallbackCount ?? 20, config?.peers?.random ?? true));
   // last resort fallback to GW
-  peers.push(new URL(GATEWAY_URL));
+  peers.push(new URL(GATEWAY_URL.toString()));
+  let oRes;
   for (let i = 0; i < peers.length; i++) {
     // format is url, base
     const peerUrl = new URL(url, peers[i]);
     const res = await retryRequest<T, R>(peerUrl.toString(), { retry: { retries: 1 }, ...config }).catch((e) => {
       if (DEBUG) logger.debug(`[fallbackPeerRequest] Error getting ${peerUrl.toString()} - ${e.message}`);
+      oRes = e.response;
       return undefined;
     });
     if (res) {
+      oRes = res;
       // we know previous peers didn't succeed, so we penalise them.
       const badPeers = peers.slice(0, i);
       // do not block for these updates
-      // note: depending on DB util, disable/reduce activity caused by this
+      // TODO: depending on DB util, disable/reduce activity caused by this
       if (config?.peers?.punish ?? true)
         penalisePeers(badPeers).catch((e) =>
           logger.warn(`[fallbackPeerRequest:penalise] Error penalising ${badPeers} - ${e}`),
@@ -46,6 +52,7 @@ export async function fallbackPeerRequest<T = any, R = AxiosResponse<T>>(
       return res;
     }
   }
+  if (config?.returnOnAllFailure) return oRes;
   // no peers succeeded, probably a bad request. no penalisation.
   throw new Error(`[fallbackPeerRequest] Unable to successfully perform request ${url} with ${peers.length} peers`);
 }
@@ -64,18 +71,42 @@ export async function peerRequest<T = any, R = AxiosResponse<T>>(
 }
 
 export async function getPeers(count = 10, random = true): Promise<URL[]> {
-  const query = database<Peers>("peers")
-    .select("url")
-    .where("url", "<>", GATEWAY_URL.toString())
-    .orderBy("trust", "desc")
-    .limit(count);
-  if (random) query.orderByRaw("RANDOM()");
-  return (await query).map((p) => new URL(p.url));
+  const query = random
+    ? `select * from (select * from peers order by trust desc limit ${Math.ceil(
+        count / 2,
+      )}) union select * from (select * from peers order by RANDOM() limit ${Math.ceil(count / 2)})`
+    : `select * from peers order by trust desc limit ${count}`;
+  // const q = database<Peers>("peers").select("*").where("url", "<>", GATEWAY_URL.toString()).orderBy("trust", "desc");
+  // if (random) {
+  //   q.limit(Math.ceil(count / 2)).union([
+  //     function (): void {
+  //       this.select("*")
+  //         .where("url", "<>", GATEWAY_URL.toString())
+  //         .limit(Math.ceil(count / 2))
+  //         .orderByRaw(`RANDOM()`);
+  //     },
+  //   ]);
+  // } else {
+  //   q.limit(count);
+  // }
+
+  // const query = database<Peers>("peers")
+  //   .select("url")
+  //   .where("url", "<>", GATEWAY_URL.toString())
+  //   .orderBy("trust", "desc")
+  //   .limit(count);
+  // const query = database.raw(`
+  // select * from (select * from peers order by trust desc limit 10) union select * from (select * from peers order by RANDOM() limit 4);
+  // `)
+  // if (random)
+  let qRes = await database.raw(query).queryContext({ name: "getPeers" });
+  if (random) qRes = shuffleArray(qRes);
+  return qRes.map((p) => new URL(p.url));
 }
 
 export const penalisePeers = (peers: URL[]): Promise<void[]> => Promise.all(peers.map(async (p) => penalisePeer(p)));
 
-export async function penalisePeer(peer: URL, decrease = 5): Promise<void> {
+export async function penalisePeer(peer: URL, decrease = 2): Promise<void> {
   // decrease trust by `decrease` until 0
   const oldTrust = await database<Peers>("peers")
     .select("trust")

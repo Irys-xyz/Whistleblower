@@ -1,4 +1,10 @@
+import { type retryRequest } from "@utils/axios";
+import { type Options } from "async-retry";
+
 export type Config = {
+  /**
+   * Database configuration
+   */
   database?: {
     /**
      * the directory to store the database file (`database.file`), WAL and SHM
@@ -11,6 +17,10 @@ export type Config = {
      */
     file?: string;
   };
+
+  /**
+   * Arweave network configuration
+   */
   arweave?: {
     /**
      * The Arweave gateway to use
@@ -22,12 +32,86 @@ export type Config = {
     /** The network height WB should start verifying from */
     startHeight?: number;
   };
+
+  /**
+   * HTTP request configuration
+   */
+  request?: {
+    defaultAxiosConfig?: Parameters<typeof retryRequest>[1];
+    defaultRetryConfig?: Options;
+    defaultDownloadTxConcurrency?: number;
+  };
+
+  transactions?: {
+    /**
+     * Number of ms to keep valid txs in DB
+     * @default 7 * 24 * 60 * 60 * 1000 (one week)
+     */
+    maxTxAgeMs?: number;
+    /**
+     * Whether to indefinitely retain invalid txs in the DB.
+     * @default false
+     */
+    preserveInvalid?: boolean;
+  };
+
+  bundles?: {
+    /**
+     * Maximum number of attempts to try to verify a bundle before marking it as invalid
+     * @default 3
+     */
+    maxBundleVerifyAttempts?: number;
+    /**
+     * Minimum time to wait (in milliseconds) between bundle verification attempts for a !valid bundle
+     * @default  5 * 60 * 1000  (5 minutes)
+     */
+    bundleVerifyMinInterval?: number;
+    /**
+     * Number of ms to keep valid bundles in DB
+     * @default 7 * 24 * 60 * 60 * 1000 (one week)
+     */
+    maxBundleAgeMs?: number;
+    /**
+     * Whether to indefinitely retain invalid bundles in the DB.
+     * @default false
+     */
+    preserveInvalid?: boolean;
+  };
+
+  /**
+   * Verification system configuration
+   */
+  verification?: {
+    /**
+     * Number of concurrent orphan transactions to resolve
+     * Increasing this might lead to arweave gateway rate limiting
+     * @default 5
+     */
+    orphanResolveConcurrency?: number;
+    /**
+     * Number of concurrent validation jobs to perform.
+     * Increasing this increases the maximum CPU, network, and memory usage of WB
+     * @default 10
+     */
+    bundleVerifyConcurrency?: number;
+
+    /**
+     * Number of tasks to run per thread, by default the max number
+     * of threads is set to bundleVerifyConcurrency, so this value will multiply the throughput
+     */
+    bundleVerifyTasksPerThread?: number;
+  };
+
   // bundlers?: Record<
   //   UrlString,
   //   {
   //     checkExpression?: string;
   //   }
   // >;
+
+  /**
+   * General system configuration
+   */
   system?: {
     /**
      * Logging level - debug logs everything, error only logs errors
@@ -47,16 +131,6 @@ export type Config = {
      */
     debug?: boolean;
     /**
-     * Number of ms to keep valid txs in DB
-     * @default 7 * 24 * 60 * 60 * 1000 (one week)
-     */
-    maxTxAgeMs?: number;
-    /**
-     * Number of ms to keep valid bundles in DB
-     * @default 7 * 24 * 60 * 60 * 1000 (one week)
-     */
-    maxBundleAgeMs?: number;
-    /**
      * Enable a TPS counter for all tracked nodes
      * @default false
      */
@@ -67,19 +141,11 @@ export type Config = {
      * @default 20 * 2 * 60 * 1000 (20 blocks)
      */
     orphanTxAgeThresholdMs?: number;
-    /**
-     * Whether to indefinitely retain invalid txs & bundles in the DB.
-     * @default true
-     */
-    preserveInvalid?: boolean;
-    /**
-     * Number of concurrent validation jobs to perform.
-     * Increasing this increases the maximum CPU, network, and memory usage of WB
-     * @default 10
-     */
-    bundleVerifyConcurrency?: number;
   };
 
+  /**
+   * Alert configuration
+   */
   alert?: {
     /**
      * Path to the file to import for the alert function
@@ -90,6 +156,8 @@ export type Config = {
     // custom options
     [k: string]: any;
   };
+
+  custom?: Record<string, any>;
 };
 
 export type UrlString = `${"http" | "https"}://${string}`;

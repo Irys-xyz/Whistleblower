@@ -1,5 +1,6 @@
 import logger from "@logger";
 import { alertFunction } from "./env";
+import { type Alert } from "@/types/alert";
 
 export async function alert(alert: Alert): Promise<void> {
   try {
@@ -8,18 +9,3 @@ export async function alert(alert: Alert): Promise<void> {
     logger.error(`[alert] Failed to trigger alert function with alert ${JSON.stringify(alert)} - ${e}`);
   }
 }
-
-export type Alert = TxAlert | BundleAlert;
-
-type AlertBase = {
-  reason: string;
-  info: { id: string; [k: string]: any };
-};
-
-export type TxAlert = {
-  type: "transaction";
-} & AlertBase;
-
-export type BundleAlert = {
-  type: "bundle";
-} & AlertBase;

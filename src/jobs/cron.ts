@@ -5,21 +5,23 @@ import { verifyBundles } from "./verifyBundles";
 import { getAllNodePostedBundles } from "./getBundles";
 import { resolveOrphanTxs } from "@/worker/resolver";
 import { pruneOldBundles, pruneOldTxs } from "./prune";
-import { verifyTxs } from "./verifyTxs";
+import { processInvalidTxs } from "./invalidTxs";
 
 export async function registerCrons(): Promise<void> {
   createCron("Crawl for peers", "*/30 * * * * *", crawlForPeers);
   createCron("Prune old txs", "15 */1 * * * *", pruneOldTxs);
   createCron("Prune old bundles", "45 */5 * * * *", pruneOldBundles);
-  // run crons once to safely catch up before continuing, otherwise race conditions can cause failures
-  await getAllNodePostedBundles(); // get all bundles
-  await verifyBundles(); // index all bundles
-  await resolveOrphanTxs(); // locate orphans
-  // now we should be up-to-date
-  createCron("Get posted bundles", "*/30 * * * * * ", getAllNodePostedBundles);
   createCron("Verify bundles", "*/15 * * * * *", verifyBundles);
-  createCron("Check orphan txs", "0 */1 * * * *", resolveOrphanTxs);
-  createCron("Verify Txs", "*/30 * * * * *", verifyTxs);
+  createCron("Resolve orphan transactions", "0 */1 * * * *", resolveOrphanTxs);
+  createCron("Process invalid transactions", "0 */1 * * * *", processInvalidTxs);
+
+  // createCron("Verification chain", "0 */1 * * * *", async () => {
+  //   // do these in order so we don't have issues with race conditions between verification steps on slower instances
+  //   await verifyBundles(); // index all bundles
+  //   await resolveOrphanTxs(); // locate orphans
+  //   await processInvalidTxs(); // process any invalid txs
+  // });
+  createCron("Get posted bundles", "*/30 * * * * * ", getAllNodePostedBundles);
 }
 
 export function createCron(name: string, time: string, fn: () => Promise<void>): void {
