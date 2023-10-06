@@ -3,7 +3,7 @@
 
 ![](./assets/irys-whistleblower.png?raw=true)
 
-Whistleblower is a lightweight tool for monitoring [transactions uploaded to Irys](https://docs.irys.xyz/learn/transaction-lifecycle), verifying they are finalized on Arweave and seeded to miners. 
+Whistleblower is a lite client for monitoring [transactions uploaded to Irys](https://docs.irys.xyz/learn/transaction-lifecycle), verifying they are finalized on Arweave and seeded to miners. 
 
 > A transaction is "finalized" once >= 50 Arweave block confirmations have passed. With a block time of ~2 minutes, it takes ~100 minutes before a transaction can be considered final.
 
