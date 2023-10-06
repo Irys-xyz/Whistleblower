@@ -44,3 +44,16 @@ export function shuffleArray<T>(array: T[]): T[] {
   }
   return newArray;
 }
+
+export async function chunked<T = any, R = any>(
+  src: T[],
+  sink: (items: T[]) => Promise<R>,
+  opts?: { chunkLength?: number },
+): Promise<R[]> {
+  const chunkLength = opts?.chunkLength ?? 50;
+  const results: R[] = [];
+  for (let i = 0; i < src.length; i += chunkLength) {
+    results.push(await sink(src.slice(i, i + chunkLength)));
+  }
+  return results;
+}

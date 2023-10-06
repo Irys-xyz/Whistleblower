@@ -1,7 +1,7 @@
 // worker process spawned whenever a bundle/tx needs to be verified
 import database from "@db/sqlite";
 import { type Bundles, type Transactions } from "@/types/db";
-import { fmtErrorConcise, sleep } from "@utils";
+import { chunked, fmtErrorConcise, sleep } from "@utils";
 import logger from "@logger";
 import { downloadTx } from "@utils/txDownloader";
 import { Readable } from "stream";
@@ -148,21 +148,27 @@ export async function verifyBundle(bundleId: string): Promise<void> {
         // we do this because it gives time for a bundler to produce a correct bundle containing the tx - which is valid behaviour.
       }
       // add items as invalid
-      await database<Transactions>("transactions")
-        .whereIn(
-          "tx_id",
-          errors.map((e) => e.id),
-        )
-        .update({ is_valid: false, date_last_verified: new Date(), bundled_in: bundleId })
-        .queryContext({ name: "updateTxValidity" });
+      await chunked(
+        errors.map((e) => e.id),
+        async (txs) =>
+          await database<Transactions>("transactions")
+            .whereIn("tx_id", txs)
+            .update({ is_valid: false, date_last_verified: new Date(), bundled_in: bundleId })
+            .queryContext({ name: "updateTxValidity" }),
+      );
     }
     if (items.length !== 0) {
       // add items as valid
       const mappedTxs = items.map((t) => t.id);
-      const presentTxIds = await database<Transactions>("transactions")
-        .whereIn("tx_id", mappedTxs)
-        .update({ bundled_in: bundleId, is_valid: true, date_last_verified: new Date() }, "tx_id")
-        .queryContext({ name: "updateTxValidity" });
+
+      const presentTxIds = await chunked(
+        mappedTxs,
+        async (txs) =>
+          await database<Transactions>("transactions")
+            .whereIn("tx_id", txs)
+            .update({ bundled_in: bundleId, is_valid: true, date_last_verified: new Date() }, "tx_id")
+            .queryContext({ name: "updateTxValidity" }),
+      );
 
       const diff = items.length - presentTxIds.length;
       // TODO: add option to insert/resolve/handle txs in bundle but not caught by listener/in DB
@@ -225,12 +231,16 @@ async function handleValidBundle({ bundleId, items }: { bundleId: string; items:
 
   // update relations - have to have a 0len check for sqlite
   if (mappedTxs.length !== 0) {
-    const presentTxIds = await database<Transactions>("transactions")
-      .whereIn("tx_id", mappedTxs)
-      .update({ bundled_in: bundleId, is_valid: true }, "tx_id")
-      .queryContext({ name: "updateTxValidity" });
+    const presentTxs = await chunked(
+      mappedTxs,
+      async (txs) =>
+        await database<Transactions>("transactions")
+          .whereIn("tx_id", txs)
+          .update({ bundled_in: bundleId, is_valid: true }, "tx_id")
+          .queryContext({ name: "updateTxValidity" }),
+    );
 
-    const diff = items.length - presentTxIds.length;
+    const diff = items.length - presentTxs.length;
     // TODO: add option to insert/resolve txs in bundle but not caught by listener
     if (diff > 0)
       logger.warn(
