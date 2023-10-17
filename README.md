@@ -38,7 +38,7 @@ As it tracks the status of each transaction, an alert will be triggered if a tra
 A transaction is invalid if and only if:
 - The transaction isn't included in a bundle by the deadline height.
 - The bundle the transaction resides in isn't seeded to >=5 miners by the deadline height.
-- The bundle the transaction resides in have <50 confirmations on Arweave.
+- The bundle the transaction resides in has <50 confirmations on Arweave.
 
 Whistleblower then:
 1. Initializes WebSocket connections to each of the selected nodes for real-time monitoring.
@@ -46,21 +46,6 @@ Whistleblower then:
 3. Connects to Arweave miners, making sure it can download the entire bundle. 
    1. Traverses through each transaction within a bundle, ensuring that it can both download and cryptographically verify each one.
 4. Triggers an alert if a transaction cannot be downloaded or verified prior to reaching its deadline height.
-
-## Whistleblower failure modes
-Whistleblower cares that a transaction is in a bundle, that bundle is onchain and the data can be downloaded from miners.
-As it tracks the status of each transaction, an alert will be triggered if:
-
-1. Whistleblower can't download and verify a transaction by its deadline height.
-2. A transaction is invalid by its deadline height.
-3. A bundle is found to be invalid:
-   1. Because it can't be cryptographically verified.
-   2. Because Whistleblower can't download the full bundle.
-4. A transaction is invalid:
-   1. Because it hasn't been verified by its deadline height.
-   2. Because it's orphaned, Whistleblower is tracking it, but it hasn't showed in any posted bundles. 
-5. A transaction is included in a bundle tagged as invalid.
-6. The data can not be downloaded
 
 ## Alerts
 
