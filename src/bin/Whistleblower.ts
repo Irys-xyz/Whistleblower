@@ -54,10 +54,10 @@ process.on("SIGINT", () => {
   const nowHeight = await getNetworkHeight();
 
   const latestHeight = await database<Bundles>("bundles")
-    .max("block")
+    .max("block", { as: "max" })
     // .where("from_node", "=", url.toString())
     .first()
-    .then((v) => v?.["max(`block`)"]);
+    .then((v) => v?.max);
   if (latestHeight)
     logger.info(
       `[Whistleblower] Last recorded network height: ${latestHeight}, current height: ${nowHeight} - catching up ${

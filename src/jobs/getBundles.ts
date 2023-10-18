@@ -25,10 +25,10 @@ export async function getPostedBundles(
   const sinceHeight =
     (config?.sinceHeight ??
       (await database<Bundles>("bundles")
-        .max("block")
+        .max("block", { as: "max" })
         .where("from_node", "=", url.toString())
         .first()
-        .then((v) => v?.["max(`block`)"])) ??
+        .then((v) => v?.max)) ??
       START_HEIGHT ??
       (await getNetworkHeight())) - 51;
 

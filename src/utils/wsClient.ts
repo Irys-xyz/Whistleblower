@@ -3,7 +3,7 @@ import { WebSocket } from "ws";
 
 /**
  *
- * @param nodeWsUrl - Url in the form `ws://node1.bundlr.network/<path>`
+ * @param nodeWsUrl - Url in the form `ws://node1.irys.xyz/<path>`
  * @param messageProcessor
  */
 export async function initWs(nodeWsUrl: URL, messageProcessor: (msg: Buffer) => Promise<void>): Promise<WebSocket> {

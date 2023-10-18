@@ -9,8 +9,8 @@ export async function processInvalidTxs(): Promise<any> {
   const height = await getNetworkHeight();
   // get the oldest unindexed bundle, don't check anything after this.
   const bundleIndexedUntilHeight = await database<Bundles>("bundles")
-    .min("block")
-    .where("date_last_verified", "<>", new Date(0))
+    .min("block", { as: "min" })
+    .where("date_last_verified", "=", 0)
     .first()
     .then((r) => r?.min ?? 0);
 
