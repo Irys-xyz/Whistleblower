@@ -38,7 +38,7 @@ export async function* downloadTx(
           opts.fallbackRequestConfig,
         );
         const b = Buffer.from(r.data.chunk, "base64url");
-        logger.debug(
+        logger.verbose(
           `[getChunk]  ${txId} offset ${offset.toString()} size ${b.length} ${new BigNumber(processedBytes)
             .dividedBy(size)
             .multipliedBy(100)
@@ -60,7 +60,7 @@ export async function* downloadTx(
     const concurrency = Math.min(parallelChunks, opts.concurrency);
     let currChunk = 0;
 
-    logger.debug(
+    logger.verbose(
       `[downloadTx] Tx ${txId} start ${startOffset} size ${size} chunks ${chunks} concurrency ${concurrency}`,
     );
 

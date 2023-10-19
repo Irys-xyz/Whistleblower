@@ -228,7 +228,7 @@ export default async function processStream(stream: Readable): Promise<ProcessSt
     for (const [length, id] of headers) {
       const res = await processItem(length, id);
       if (res instanceof Error) {
-        logger.debug(`[processStream] Got Error ${res} for ${id}`);
+        logger.verbose(`[processStream] Got Error ${res} for ${id}`);
         if (res.cause === DATA_SRC_FAILURE_CODE) throw new ProcessStreamFailure(res, { items, errors });
         errors.push({ id, error: res });
       } else {
