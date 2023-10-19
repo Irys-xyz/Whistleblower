@@ -14,8 +14,8 @@ export type Bundles = {
   block: number;
   is_valid: number | boolean | undefined;
   date_last_verified: Date | number | undefined;
-  date_created: Date | number | undefined;
   nested: boolean;
+  date_created: Date | number | undefined;
   from_node: string | undefined;
   verify_attempts: number;
 };
@@ -33,3 +33,13 @@ export type Bundlers = {
   address: string;
   // ar_public_key: string;
 };
+
+declare module "knex/types/tables" {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+  interface Tables {
+    transactions: Transactions;
+    bundles: Bundles;
+    peers: Peers;
+    bundlers: Bundlers;
+  }
+}

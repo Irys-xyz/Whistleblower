@@ -112,7 +112,7 @@ export async function penalisePeer(peer: URL, decrease = 2): Promise<void> {
   logger.debug(`[penalisePeer] Penalising ${peer}`);
   if (!oldTrust) return;
   const newTrust = oldTrust - decrease;
-  await database<Peers>("peers")
+  await database("peers")
     .update("trust", newTrust < 0 ? 0 : newTrust)
     .where("url", "=", peer.toString());
 }
