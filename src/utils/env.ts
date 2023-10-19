@@ -84,3 +84,4 @@ export const DEFAULT_AXIOS_CONFIG = config?.request?.defaultAxiosConfig ?? {
 };
 export const DEFAULT_REQUEST_RETRY_CONFIG = config?.request?.defaultRetryConfig ?? {};
 export const MAX_BUNDLE_VERIFY_ATTEMPTS = config?.bundles?.maxBundleVerifyAttempts ?? 3;
+export const MINIMUM_FULL_REPLICAS = +(config?.bundles?.requiredReplicas ?? 5);

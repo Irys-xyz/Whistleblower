@@ -16,6 +16,7 @@ import axios from "axios";
 import { inspect } from "util";
 import { MAX_BUNDLE_VERIFY_ATTEMPTS } from "@utils/env";
 import piscina from "piscina";
+import { checkReplicas } from "@utils/bundles";
 
 // only add handlers if we're in a worker thread
 if (piscina.isWorkerThread) {
@@ -41,11 +42,7 @@ if (piscina.isWorkerThread) {
  * @returns nothing
  */
 export async function verifyBundle(bundleId: string): Promise<void> {
-  // non-critical so we don't care if this req fails - though odds are if it does then downloadTx will also fail.
-  // TODO: figure out good way of getting processed bytes from the iterator/readable itself
-  const offsetPromise = fallbackPeerRequest<{ offset: number; size: number }>(`/tx/${bundleId}/offset`).catch(
-    (_) => undefined,
-  );
+  const metadata = await fallbackPeerRequest<{ offset: number; size: number }>(`/tx/${bundleId}/offset`);
   const then = performance.now();
   try {
     // try {
@@ -73,12 +70,15 @@ export async function verifyBundle(bundleId: string): Promise<void> {
         `[verifyBundle] Bundle ${bundleId} has not received the required number of confirmations (${txStatus?.data?.number_of_confirmations} < 50)`,
       );
     }
+
+    // check if enough replicas exist
+    const hasEnoughFullReplicas = await checkReplicas(bundleId, metadata.data.size, metadata.data.offset);
+    if (!hasEnoughFullReplicas)
+      return void logger.warn(`[verifyBundle] Bundle does not have enough full replicas - requeueing`);
     logger.verbose(`[verifyBundle] Downloading & processing bundle ${bundleId}`);
 
     // download and verify data
     let minerAttempt: Awaited<ReturnType<typeof processStream>> | Error;
-    // eslint-disable-next-line prefer-const
-    minerAttempt = new Error("test");
 
     try {
       const chunkGen = downloadTx(bundleId);
@@ -207,16 +207,14 @@ export async function verifyBundle(bundleId: string): Promise<void> {
       .catch((e) =>
         logger.error(`[verifyBundle:dateVerified] Unable to update verification date for ${bundleId} - ${e}`),
       );
-    const size = await offsetPromise;
+    const size = metadata.data.size;
     const timeTaken = (performance.now() - then) / 1000;
-    const MBps = size?.data
-      ? new BigNumber(size.data.size).dividedBy(1_000_000).dividedBy(timeTaken).toFixed(3)
-      : undefined;
+    const MBps = new BigNumber(size).dividedBy(1_000_000).dividedBy(timeTaken).toFixed(3);
 
     logger.verbose(
-      `[verifyBundle:finally] Finished processing ${bundleId} - took ${timeTaken}s ${
-        size?.data ? `${new BigNumber(size.data.size).dividedBy(1_000_000).toFixed(3)}MB` : ""
-      } ${MBps ? `(${MBps}MB/s)` : ""}`,
+      `[verifyBundle:finally] Finished processing ${bundleId} - took ${timeTaken}s ${`${new BigNumber(size)
+        .dividedBy(1_000_000)
+        .toFixed(3)}MB`} ${MBps ? `(${MBps}MB/s)` : ""}`,
     );
   }
 }
