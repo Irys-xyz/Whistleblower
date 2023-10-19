@@ -1,6 +1,6 @@
 import axios, { type AxiosError, type AxiosRequestConfig, type AxiosResponse } from "axios";
 import retry from "async-retry";
-import { DEBUG, DEFAULT_AXIOS_CONFIG, DEFAULT_REQUEST_RETRY_CONFIG } from "./env";
+import { DEFAULT_AXIOS_CONFIG, DEFAULT_REQUEST_RETRY_CONFIG } from "./env";
 import logger from "@logger";
 
 /**
@@ -21,12 +21,11 @@ export async function retryRequest<T = any, R = AxiosResponse<T>>(
     async (bail) => {
       const then = performance.now();
       const r = await axios<T, R>(url.toString(), config).catch((e) => e);
-      if (DEBUG)
-        logger.debug(
-          `[retryRequest] ${r.config.method?.toUpperCase()} ${url.toString()} status ${r?.status ?? r?.code} took ${(
-            performance.now() - then
-          ).toFixed(3)}ms`,
-        );
+      logger.debug(
+        `[retryRequest] ${r.config.method?.toUpperCase()} ${url.toString()} status ${r?.status ?? r?.code} took ${(
+          performance.now() - then
+        ).toFixed(3)}ms`,
+      );
       if ((await config?.retry?.shouldBail?.(r)) === true) bail(r);
       if (r instanceof Error) throw r;
       return r;

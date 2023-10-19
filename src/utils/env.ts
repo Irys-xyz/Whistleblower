@@ -13,10 +13,11 @@ const configFileExists = statSync(configPath, { throwIfNoEntry: false });
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 export const config: Config | undefined = configFileExists ? require(configPath).default : undefined;
 
-export const DEBUG = !!(process.env.debug ?? config?.system?.debug);
+// export const DEBUG = !!(process.env.debug ?? config?.system?.debug);
+export const LOG_LEVEL = process.env.LOG_LEVEL ?? config?.system?.logLevel ?? "info";
 
 // TODO: see how viable using longJohn for extended traces in debug mode is
-if (DEBUG) {
+if (LOG_LEVEL === "debug") {
   // double stacktrace limit
   Error.stackTraceLimit = 20;
   // // potentially dangerous hack to always include stack traces
@@ -28,7 +29,6 @@ if (DEBUG) {
 }
 
 export const ENABLE_TPS_COUNTER = config?.system?.enableTpsCounter ?? false;
-export const LOG_LEVEL = DEBUG ? "debug" : process.env.LOG_LEVEL ?? config?.system?.logLevel ?? "info";
 
 export const DATABASE_DIR = config?.database?.dir ?? "./db";
 

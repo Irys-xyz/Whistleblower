@@ -1,5 +1,4 @@
 import logger from "@logger";
-import { DEBUG } from "@utils/env";
 import { type Knex } from "knex";
 
 export function wrapKnex(knex: Knex): void {
@@ -31,6 +30,6 @@ export function wrapKnex(knex: Knex): void {
     const durationStr = duration.toFixed(3);
     const str = q?.queryContext?.name ?? q.sql;
     if (duration > alertTimeout) logger.warn(`[DB] query ${str} took too long! (${durationStr} > ${alertTimeout})`);
-    if (DEBUG) logger.debug(`[DB] query ${str} took ${durationStr}ms`);
+    logger.debug(`[DB] query ${str} took ${durationStr}ms`);
   });
 }

@@ -4,7 +4,7 @@ import logger from "@logger";
 import { type AxiosResponse } from "axios";
 import { type Peers } from "@/types/db";
 import { asyncPool } from "./asyncPool";
-import { DEBUG, GATEWAY_URL } from "./env";
+import { GATEWAY_URL } from "./env";
 import { shuffleArray } from "@utils";
 
 /**
@@ -31,7 +31,7 @@ export async function fallbackPeerRequest<T = any, R = AxiosResponse<T>>(
     // format is url, base
     const peerUrl = new URL(url, peers[i]);
     const res = await retryRequest<T, R>(peerUrl.toString(), { retry: { retries: 1 }, ...config }).catch((e) => {
-      if (DEBUG) logger.debug(`[fallbackPeerRequest] Error getting ${peerUrl.toString()} - ${e.message}`);
+      logger.debug(`[fallbackPeerRequest] Error getting ${peerUrl.toString()} - ${e.message}`);
       oRes = e.response;
       return undefined;
     });
