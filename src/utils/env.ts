@@ -74,7 +74,7 @@ export const BUNDLE_VERIFY_CONCURRENCY =
   (config?.verification?.bundleVerifyConcurrency ?? 10) < 1 ? 10 : config?.verification?.bundleVerifyConcurrency ?? 10;
 
 export const DEFAULT_AXIOS_CONFIG = config?.request?.defaultAxiosConfig ?? {
-  validateStatus: (status): boolean => status < 407,
+  validateStatus: (status): boolean => status < 400,
   timeout: 20_000,
   retry: {
     shouldBail: (response): boolean => {
@@ -84,3 +84,4 @@ export const DEFAULT_AXIOS_CONFIG = config?.request?.defaultAxiosConfig ?? {
 };
 export const DEFAULT_REQUEST_RETRY_CONFIG = config?.request?.defaultRetryConfig ?? {};
 export const MAX_BUNDLE_VERIFY_ATTEMPTS = config?.bundles?.maxBundleVerifyAttempts ?? 3;
+export const MINIMUM_FULL_REPLICAS = +(config?.bundles?.requiredReplicas ?? 5);

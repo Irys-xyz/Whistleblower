@@ -108,11 +108,7 @@ export const penalisePeers = (peers: URL[]): Promise<void[]> => Promise.all(peer
 
 export async function penalisePeer(peer: URL, decrease = 2): Promise<void> {
   // decrease trust by `decrease` until 0
-  const oldTrust = await database<Peers>("peers")
-    .select("trust")
-    .where("url", "=", peer.toString())
-    .first()
-    .then((v) => v?.trust);
+  const oldTrust = await getPeerTrust(peer);
   logger.debug(`[penalisePeer] Penalising ${peer}`);
   if (!oldTrust) return;
   const newTrust = oldTrust - decrease;
@@ -123,12 +119,17 @@ export async function penalisePeer(peer: URL, decrease = 2): Promise<void> {
 
 export const praisePeers = (peers: URL[]): Promise<void[]> => Promise.all(peers.map(async (p) => penalisePeer(p)));
 
-export async function praisePeer(peer: URL): Promise<void> {
-  const oldTrust = await database<Peers>("peers")
+export async function getPeerTrust(peer: URL): Promise<number> {
+  return await database<Peers>("peers")
     .select("trust")
     .where("url", "=", peer.toString())
     .first()
+    .queryContext({ name: "getPeerTrust" })
     .then((v) => v?.trust ?? 0);
+}
+
+export async function praisePeer(peer: URL): Promise<void> {
+  const oldTrust = await getPeerTrust(peer);
   logger.debug(`[praisePeer] Praising peer ${peer}`);
   const newTrust = oldTrust + repIncrease(oldTrust);
   await database<Peers>("peers")
@@ -144,6 +145,7 @@ export async function addPeers(peers: URL[], startingTrust = 10): Promise<void> 
       .select("url")
       .where("url", "=", peer.toString())
       .first()
+      .queryContext({ name: "peerInDB" })
       .then((v) => !!v?.url);
 
     if (inDB) return undefined;
@@ -155,7 +157,8 @@ export async function addPeers(peers: URL[], startingTrust = 10): Promise<void> 
     if (res) finalPeers.push({ url: res.toString(), trust: startingTrust, date_created: new Date() });
   }
   logger.verbose(`[addPeers] Added ${finalPeers.length} new peers`);
-  if (finalPeers.length > 0) await database<Peers>("peers").insert(finalPeers).onConflict("url").ignore();
+  if (finalPeers.length > 0)
+    await database<Peers>("peers").insert(finalPeers).onConflict("url").ignore().queryContext({ name: "peersInsert" });
 }
 
 // math

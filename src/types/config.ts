@@ -76,6 +76,11 @@ export type Config = {
      * @default false
      */
     preserveInvalid?: boolean;
+    /**
+     * Number of required replicas for a bundle (and child Tx) to be valid
+     * @default 5
+     */
+    requiredReplicas?: number;
   };
 
   /**

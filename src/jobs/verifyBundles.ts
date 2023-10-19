@@ -21,11 +21,12 @@ export async function verifyBundles(): Promise<void> {
     .andWhere("date_last_verified", "<", new Date(Date.now() - BUNDLE_VERIFY_MIN_RETRY_INTERVAL))
     // limit so we can retry older bundles faster if we have a massive backlog
     .limit(VERIFY_BUNDLES_BATCH_SIZE)
+    .queryContext({ name: "bundlesToProcess" })
     .then((v) => v.map((x) => x.tx_id));
 
   logger.verbose(`[verifyBundles] verifying ${bundlesToProcess.length} bundles`);
   if (bundlesToProcess.length === VERIFY_BUNDLES_BATCH_SIZE)
-    logger.warn(`[verifyBundles] High number of bundles waiting for verification ${bundlesToProcess.length}+`);
+    logger.warn(`[verifyBundles] High number of bundles waiting for verification (${bundlesToProcess.length}+)`);
 
   // TODO: add a hard timeout to verifier jobs so a single job can't deadlock WB's verification pipeline
   const processing = bundlesToProcess.map((b) => bundleVerifier.run(b));

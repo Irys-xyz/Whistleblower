@@ -2,8 +2,8 @@
   "name": "whistleblower",
   "version": "1.0.0",
   "main": "index.js",
-  "repository": "https://github.com/Bundlr-Network/Whistleblower.git",
-  "author": "JesseTheRobot <jesse@bundlr.network>",
+  "repository": "https://github.com/Irys-xyz/Whistleblower.git",
+  "author": "JesseTheRobot <jesse@irys.xyz>",
   "license": "MIT",
   "scripts": {
     "build": "(rm -rf ./build || true ) && npx tsc -p release.tsconfig.json && npx resolve-tspaths -p release.tsconfig.json",

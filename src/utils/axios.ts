@@ -23,9 +23,9 @@ export async function retryRequest<T = any, R = AxiosResponse<T>>(
       const r = await axios<T, R>(url.toString(), config).catch((e) => e);
       if (DEBUG)
         logger.debug(
-          `[retryRequest] ${r.config.method?.toUpperCase()} ${url.toString()} status ${r?.status ?? r?.code} took ${
+          `[retryRequest] ${r.config.method?.toUpperCase()} ${url.toString()} status ${r?.status ?? r?.code} took ${(
             performance.now() - then
-          }ms`,
+          ).toFixed(3)}ms`,
         );
       if ((await config?.retry?.shouldBail?.(r)) === true) bail(r);
       if (r instanceof Error) throw r;
