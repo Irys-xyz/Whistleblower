@@ -42,7 +42,9 @@ if (piscina.isWorkerThread) {
  * @returns nothing
  */
 export async function verifyBundle(bundleId: string): Promise<void> {
-  const metadata = await fallbackPeerRequest<{ offset: number; size: number }>(`/tx/${bundleId}/offset`);
+  const metadata = await fallbackPeerRequest<{ offset: number; size: number }>(`/tx/${bundleId}/offset`, {
+    timeout: 5_000,
+  });
   const then = performance.now();
   try {
     // try {
@@ -58,7 +60,7 @@ export async function verifyBundle(bundleId: string): Promise<void> {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const txStatus = await fallbackPeerRequest<{ block_height: number; number_of_confirmations: number } | undefined>(
       `/tx/${bundleId}/status`,
-      { returnOnAllFailure: true },
+      { returnOnAllFailure: true, validateStatus: (s) => s === 200, timeout: 5_000 },
     );
 
     // shouldn't happen, usually means the tx isn't fully seeded

@@ -6,7 +6,6 @@ import { MINIMUM_FULL_REPLICAS } from "./env";
 import database from "@db/sqlite";
 import { type Peers } from "@/types/db";
 import PromisePool from "@supercharge/promise-pool";
-import { fmtErrorConcise } from "@utils";
 
 // export type BundleMeta = {
 //   offset: number;
@@ -45,9 +44,8 @@ export async function hasData(peer: string, txId: string, size: number, offset: 
       logger.verbose(`[hasData] ${txId} seeded at ${peer}`);
       // await redisClient.set(REDIS_LAST_SEEDED_KEY, Date.now().toString());
       return true;
-    } else {
-      throw new Error("[hasData] Node not synced");
     }
+    return false;
   } catch (e) {
     logger.debug(e);
     return false;
@@ -68,20 +66,20 @@ export async function checkReplicas(txId: string, size: number, offset: number):
       dbOffset += peers.length;
       await new PromisePool()
         .for(peers.map((p) => p.url))
+        .withConcurrency(10)
         .handleError((e, p) => {
-          logger.error(
-            `[checkReplicas:pool] Error checking replicas for ${txId} with peer ${p} - ${fmtErrorConcise(e)}`,
-          );
+          logger.warn(`[checkReplicas:pool] Error checking replicas for ${txId} with peer ${p} - ${e}`);
         })
-        .process(async (peer) => {
+        .process(async (peer, _, pool) => {
           const res = await hasData(peer, txId, size, offset);
           if (res) fullReplicas++;
+          if (fullReplicas >= replicaCount) pool.stop();
         });
       if (fullReplicas >= replicaCount) return fullReplicas;
     }
     return false;
   } catch (e) {
-    logger.error(`[checkReplicas] Error while checking for ${txId} - ${fmtErrorConcise(e)}`);
+    logger.error(`[checkReplicas] Error while checking for ${txId} - ${e}`);
     return false;
   }
 }
